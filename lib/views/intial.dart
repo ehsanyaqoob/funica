@@ -34,11 +34,7 @@ class _InitialViewState extends State<InitialView> {
             body: Stack(
               fit: StackFit.expand,
               children: [
-                Image.asset(
-                  Assets.art,
-                  fit: BoxFit.cover,
-                  cacheWidth: 1080,
-                ),
+                Image.asset(Assets.art, fit: BoxFit.cover, cacheWidth: 1080),
 
                 Container(
                   decoration: BoxDecoration(
@@ -117,12 +113,12 @@ class _InitialViewState extends State<InitialView> {
                           MyButtonWithIcon(
                             text: 'Sign-up with email'.tr,
                             icon: Icons.email,
-                            onTap: () { Get.to(
+                            onTap: () {
+                              Get.to(
                                 const SignUpScreen(),
                                 transition: Transition.cupertino,
                                 duration: const Duration(milliseconds: 500),
                               );
-
                             },
                             color: kPrimaryColor,
                             textColor: kWhite,
@@ -133,20 +129,20 @@ class _InitialViewState extends State<InitialView> {
                     ),
                   ),
                 ),
-                 if (kDebugMode)
-                      Positioned(
-                        top: 20,
-                        right: 20,
-                        child: FloatingActionButton(
-                          mini: true,
-                          backgroundColor: kDynamicBackground(context),
-                          onPressed: () => themeController.toggleTheme(),
-                          child: Icon(
-                            isDarkMode ? Icons.light_mode : Icons.dark_mode,
-                            color: kDynamicIcon(context),
-                          ),
-                        ),
+                if (kDebugMode)
+                  Positioned(
+                    top: 20,
+                    right: 20,
+                    child: FloatingActionButton(
+                      mini: true,
+                      backgroundColor: kDynamicBackground(context),
+                      onPressed: () => themeController.toggleTheme(),
+                      child: Icon(
+                        isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                        color: kDynamicIcon(context),
                       ),
+                    ),
+                  ),
               ],
             ),
           ),

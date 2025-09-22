@@ -1,113 +1,109 @@
+import 'dart:io';
 import 'package:funica/constants/export.dart';
+import 'package:funica/controller/profile-data-cont.dart';
 
-class HomeInfoCard extends StatelessWidget {
-  final String username;
-  final String fullName;
-  final VoidCallback onCartTap;
-  final String profileImage;
+class UserInfoRow extends StatelessWidget {
+  final VoidCallback? onAvatarTap;
+  final VoidCallback? onNotificationTap;
+  final VoidCallback? onFavoriteTap;
 
-  const HomeInfoCard({
+  const UserInfoRow({
     Key? key,
-    required this.username,
-    required this.fullName,
-    required this.onCartTap,
-    required this.profileImage,
+    this.onAvatarTap,
+    this.onNotificationTap,
+    this.onFavoriteTap,
   }) : super(key: key);
+String getGreeting() {
+  final hour = DateTime.now().hour;
+  if (hour < 12) {
+    return 'Good Morning 👋';
+  } else if (hour < 17) {
+    return 'Good Afternoon 👋';
+  } else {
+    return 'Good Evening 👋';
+  }
+}
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: kDynamicPrimary(context), width: 3.6),
-          ),
-          child: GestureDetector(
-            onTap: () {
-              // for profile screen
-            },
-            child: CircleAvatar(
-              radius: 26.0,
-              backgroundColor: Colors.transparent,
-              child: ClipOval(
-                child: Image.asset(
-                  profileImage,
-                  width: 120,
-                  height: 120,
-                  fit: BoxFit.cover,
+final FillUpProfileController controller = Get.put(FillUpProfileController());
+
+    return GetBuilder<FillUpProfileController>(
+      builder: (_) {
+        return Row(
+          children: [
+            // Avatar
+            Bounce(
+              onTap: onAvatarTap ?? () {},
+              child: CircleAvatar(
+                radius: 30,
+                backgroundColor: kDynamicBorder(context),
+                child: CircleAvatar(
+                  radius: 28,
+                  backgroundColor: kDynamicContainer(context),
+                  backgroundImage: controller.profileImage != null
+                      ? FileImage(controller.profileImage!)
+                      : null,
+                  child: controller.profileImage == null
+                      ? SvgPicture.asset(
+                          Assets.personfilled,
+                          height: 28,
+                          color: kDynamicIcon(context),
+                        )
+                      : null,
                 ),
               ),
             ),
-          ),
-        ),
-        Gap(16.0),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            MyText(
-              text: username,
-              size: 16,
-              weight: FontWeight.bold,
-              color: kDynamicText(context).withOpacity(0.6),
+
+            const SizedBox(width: 20),
+
+            // Greeting & Name
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                 MyText(
+  text: getGreeting(),
+  size: 14,
+  weight: FontWeight.w600,
+  color: kDynamicText(context).withOpacity(0.7),
+),
+
+                  MyText(
+  text: controller.userName?.isNotEmpty == true
+      ? controller.userName!
+      : 'Andrew Ainsley',
+  size: 18,
+  weight: FontWeight.bold,
+  color: kDynamicText(context),
+),
+
+                ],
+              ),
             ),
-            MyText(
-              text: fullName,
-              size: 18,
-              weight: FontWeight.bold,
-              color: kDynamicText(context),
-            ),
-          ],
-        ),
-        const Spacer(),
-        Stack(
-          children: [
-            GestureDetector(
-              onTap: onCartTap,
-              child: Container(
-                height: 60,
-                width: 60,
-                decoration: BoxDecoration(
-                  color: kDynamicContainer(context),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: kDynamicIcon(context).withOpacity(0.6),
-                    width: 2.6,
+
+            // Notifications & Heart Icons
+            Row(
+              children: [
+                IconButton(
+                  onPressed: onNotificationTap ?? () {},
+                  icon: SvgPicture.asset(
+                    Assets.notificationunfilled,
+                    color: kDynamicIcon(context),
                   ),
                 ),
-                child: Center(
-                  child: Image.asset(
-                    Assets.imagescartactive,
-                    height: 30,
-                    width: 30,
-                    fit: BoxFit.cover,
+                IconButton(
+                  onPressed: onFavoriteTap ?? () {},
+                  icon: SvgPicture.asset(
+                    Assets.heartunfilled,
+                    color: kDynamicIcon(context),
                   ),
                 ),
-              ),
-            ),
-            // Badge with item count
-            Positioned(
-              top: 8,
-              right: 8,
-              child: Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: Colors.red, // Badge color
-                  shape: BoxShape.circle,
-                ),
-                constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
-                child: MyText(
-                  text: '5',
-                              color: kDynamicText(context),
-                  size: 12,
-                  weight: FontWeight.bold,
-                ),
-              ),
+              ],
             ),
           ],
-        ),
-      ],
+        );
+      },
     );
   }
 }

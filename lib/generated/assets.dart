@@ -96,9 +96,8 @@ class Assets {
   static const String funicalight = "assets/images/funica-light.png";
   static const String funicalampdark = "assets/images/funicainitial.jpg";
   static const String funicalamplight = "assets/images/funicainitial.jpg";
-  static const String kitchen = "assets/images/kitchen.jpg";
   static const String art = "assets/images/art.jpg";
-  static const String smsfilled  = "assets/images/sms.svg";
+  static const String smsfilled = "assets/images/sms.svg";
   static const String monitor = "assets/images/monitors.jpg";
 
   static const String emailfilled = "assets/images/email-filled.svg";
@@ -114,8 +113,26 @@ class Assets {
   static const String phoneunfilled = "assets/images/phoneunfilled.svg";
   static const String biofilled = "assets/images/biofilled.svg";
 
-    static const String pencilfilled = "assets/images/pencilfilled.svg";
-  static const String calendarfilled= "assets/images/calendarfilled.svg";
+  static const String pencilfilled = "assets/images/pencilfilled.svg";
+  static const String calendarfilled = "assets/images/calendarfilled.svg";
+
+  static const String notificationunfilled =
+      "assets/images/notificationunfilled.svg";
+  static const String notificationfilled =
+      "assets/images/notificationfilled.svg";
+  static const String heartfilled = "assets/images/heartfilled.svg";
+  static const String heartunfilled = "assets/images/heartunfilled.svg";
+  static const String searchunfilled = "assets/images/searchunfilled.svg";
+  // products
+  static const String sofa = "assets/images/sofa.svg";
+  static const String chair = "assets/images/chair.svg";
+  static const String table = "assets/images/table.svg";
+  static const String kitchen = "assets/images/kitchen.svg";
+  static const String lamp = "assets/images/lamp.svg";
+  static const String cupboard = "assets/images/cupboard.svg";
+  static const String vase = "assets/images/vase.svg";
+  static const String more = "assets/images/more.svg";
+
   /// Assets for imagesFax
   /// assets/images/fax.png
   static const String imagesFax = "assets/images/fax.png";
