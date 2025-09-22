@@ -58,11 +58,11 @@ class _SplashScreenState extends State<SplashScreen>
       SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-        systemNavigationBarColor: bgColor,
-        systemNavigationBarIconBrightness: isDark
-            ? Brightness.light
-            : Brightness.dark,
-        systemNavigationBarDividerColor: Colors.transparent,
+        // systemNavigationBarColor: bgColor,
+        // systemNavigationBarIconBrightness: isDark
+        //     ? Brightness.light
+        //     : Brightness.dark,
+        // systemNavigationBarDividerColor: Colors.transparent,
       ),
     );
 
@@ -88,7 +88,7 @@ class _SplashScreenState extends State<SplashScreen>
             statusBarIconBrightness: isDarkMode
                 ? Brightness.light
                 : Brightness.dark,
-            systemNavigationBarColor: kDynamicBackground(context),
+            systemNavigationBarColor: kDynamicScaffoldBackground(context),
             systemNavigationBarIconBrightness: isDarkMode
                 ? Brightness.light
                 : Brightness.dark,
@@ -106,11 +106,10 @@ class _SplashScreenState extends State<SplashScreen>
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Image.asset(
-                            isDarkMode ? Assets.funicadark : Assets.funicalight,
-                            height: 70,
+                            isDarkMode ? Assets.funicalight : Assets.funicadark,
+                            height: 100,
                             width: 80,
                           ),
-                          Gap(16.0),
                           MyText(
                             text: "Funica".tr,
                             size: 22,
@@ -132,13 +131,13 @@ class _SplashScreenState extends State<SplashScreen>
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              MyText(
-                                text: "Funica".tr,
-                                size: 16,
-                                weight: FontWeight.w500,
-                                color: kDynamicText(context),
-                              ),
-                              const Gap(24),
+                              // MyText(
+                              //   text: "Funica".tr,
+                              //   size: 16,
+                              //   weight: FontWeight.w500,
+                              //   color: kDynamicText(context),
+                              // ),
+                              // const Gap(24),
                               const FunicaLoader(),
                             ],
                           ),

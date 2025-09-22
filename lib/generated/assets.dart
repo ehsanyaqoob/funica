@@ -92,10 +92,30 @@ class Assets {
   static const String imagesFaqs = "assets/images/faqs.png";
   static const String imagesFashion = "assets/images/Fashion.png";
 
-  // funica logo
   static const String funicadark = "assets/images/funica-dark.png";
   static const String funicalight = "assets/images/funica-light.png";
+  static const String funicalampdark = "assets/images/funicainitial.jpg";
+  static const String funicalamplight = "assets/images/funicainitial.jpg";
+  static const String kitchen = "assets/images/kitchen.jpg";
+  static const String art = "assets/images/art.jpg";
+  static const String smsfilled  = "assets/images/sms.svg";
+  static const String monitor = "assets/images/monitors.jpg";
 
+  static const String emailfilled = "assets/images/email-filled.svg";
+  static const String emailunfilled = "assets/images/email-unfilled.svg";
+  static const String lockfilled = "assets/images/loack-filled.svg";
+  static const String lockunfilled = "assets/images/lock-unfilled.svg";
+  static const String google = "assets/images/google.svg";
+  static const String apple = "assets/images/apple.svg";
+  static const String facebook = "assets/images/facebook.svg";
+  static const String personfilled = "assets/images/personfilled.svg";
+
+  static const String phonefilled = "assets/images/phonefilled.svg";
+  static const String phoneunfilled = "assets/images/phoneunfilled.svg";
+  static const String biofilled = "assets/images/biofilled.svg";
+
+    static const String pencilfilled = "assets/images/pencilfilled.svg";
+  static const String calendarfilled= "assets/images/calendarfilled.svg";
   /// Assets for imagesFax
   /// assets/images/fax.png
   static const String imagesFax = "assets/images/fax.png";

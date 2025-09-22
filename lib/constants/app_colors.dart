@@ -240,7 +240,12 @@ Color kDynamicSystemPurple(BuildContext context) => kPurple;
 Color kDynamicSystemYellow(BuildContext context) => kYellowColor;
 Color kDynamicSystemPink(BuildContext context) => kPink;
 Color kDynamicSystemCyan(BuildContext context) => kCyran;
-
+// In your colors/theme file
+Color kDynamicIconOnPrimary(BuildContext context) {
+  return Theme.of(context).brightness == Brightness.dark 
+      ? Colors.black // Dark theme check color
+      : Colors.white; // Light theme check color
+}
 // ==================== UTILITY FUNCTIONS ====================
 Color kDynamicColor(BuildContext context, Color lightColor, Color darkColor) =>
     kIsDarkMode(context) ? darkColor : lightColor;
@@ -262,6 +267,7 @@ Color kDynamicLoaderBackground(BuildContext context) =>
         ? kSecondaryDark         // Dark secondary as track
         : kSecondaryColor.withOpacity(0.2); // Light track
 
+
 // ==================== MATERIAL THEME EXTENSIONS ====================
 extension ThemeContextExtensions on BuildContext {
   bool get isDarkMode => kIsDarkMode(this);
@@ -276,12 +282,12 @@ extension ThemeContextExtensions on BuildContext {
   Color get warning => kDynamicWarning(this);
 }
 
-/// 🎨 Funica Base Theme Colors
-const kPrimaryColor = Color(0xFF000000); // Black (Light mode titles, buttons)
-const kPrimaryDark = Color(0xFF1C1C1E); // Dark Gray (Dark mode primary)
+/// 🎨 npf base theme colors Base Theme Colors
+const kPrimaryColor = Color(0xFF000000); 
+const kPrimaryDark = Color(0xFF1C1C1E); 
 
-const kSecondaryColor = Color(0xFFFFFFFF); // White
-const kSecondaryDark = Color(0xFF2C2C2E); // iOS Dark secondary background
+const kSecondaryColor = Color(0xFFFFFFFF); 
+const kSecondaryDark = Color(0xFF2C2C2E); 
 
 const kLightBackground = Color(0xFFFFFFFF);
 const kDarkBackground = Color(0xFF1C1C1E);

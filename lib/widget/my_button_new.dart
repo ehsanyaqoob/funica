@@ -1,4 +1,5 @@
 import 'package:funica/constants/export.dart';
+import 'package:funica/widget/dot-loader.dart';
 
 class MyButtonWithIcon extends StatelessWidget {
   const MyButtonWithIcon({
@@ -90,7 +91,7 @@ class MyButtonWithIcon extends StatelessWidget {
                       color: Colors.black.withOpacity(0.1),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
-                    )
+                    ),
                   ]
                 : null,
           ),
@@ -147,23 +148,19 @@ class MyButtonWithIcon extends StatelessWidget {
     );
   }
 }
-
-
 class MyButton extends StatelessWidget {
   const MyButton({
     super.key,
-    this.onTap, // made optional
-    this.onTapWithParam, // new optional callback
+    this.onTap,
+    this.onTapWithParam,
     required this.buttonText,
-    this.height = 48,
+    this.height = 50,
     this.width,
     this.backgroundColor,
     this.fontColor,
     this.fontSize,
-    this.outlineColor = Colors.transparent,
-    this.radius = 6,
-    this.svgIcon,
-    this.haveSvg = false,
+    this.outlineColor,
+    this.radius = 30.0,
     this.choiceIcon,
     this.isleft = false,
     this.mhoriz = 0,
@@ -174,35 +171,43 @@ class MyButton extends StatelessWidget {
     this.isactive = true,
     this.mTop = 0,
     this.fontWeight,
-    this.isLoading = false, //  added new flag
+    this.isLoading = false,
     this.loaderColor,
-    this.param, // extra parameter for onTapWithParam
+    this.param,
   });
 
   final String buttonText;
-  final VoidCallback? onTap; // made nullable
-  final ValueChanged<String>? onTapWithParam; // new optional function
-  final String? param; // extra parameter to pass when onTapWithParam is used
+  final VoidCallback? onTap;
+  final ValueChanged<String>? onTapWithParam;
+  final String? param;
 
   final double? height;
   final double? width;
   final double radius;
   final double? fontSize;
-  final Color outlineColor;
+  final Color? outlineColor;
   final bool hasicon, isleft, hasshadow, hasgrad, isactive;
   final Color? backgroundColor, fontColor;
-  final String? svgIcon, choiceIcon;
-  final bool haveSvg;
+  final String? choiceIcon;
   final double mTop, mBottom, mhoriz;
   final FontWeight? fontWeight;
-  final bool isLoading; 
-  final Color? loaderColor; 
+  final bool isLoading;
+  final Color? loaderColor;
 
   @override
   Widget build(BuildContext context) {
+    final bgColor = isactive
+        ? backgroundColor ?? kDynamicButtonBackground(context)
+        : kDynamicButtonDisabled(context);
+
+    final txtColor = fontColor ?? kDynamicButtonText(context);
+    
+    // Determine the appropriate loader color based on button background
+    final Color effectiveLoaderColor = loaderColor ?? _getLoaderColorForButton(bgColor, context);
+
     return Animate(
       effects: [
-        FadeEffect(duration: const Duration(milliseconds: 1000)),
+        FadeEffect(duration: const Duration(milliseconds: 500)),
         MoveEffect(curve: Curves.fastLinearToSlowEaseIn),
       ],
       child: Bounce(
@@ -226,26 +231,25 @@ class MyButton extends StatelessWidget {
           height: height,
           width: width,
           decoration: BoxDecoration(
-            color: isactive
-                ? backgroundColor ?? kPrimaryColor
-                : backgroundColor ?? const Color(0xff0E1A34).withOpacity(0.35),
-            border: Border.all(color: outlineColor),
+            color: hasgrad ? null : bgColor,
+            gradient: hasgrad ? kDynamicPrimaryGradient(context) : null,
+            border: Border.all(color: outlineColor ?? kDynamicOutline(context)),
             borderRadius: BorderRadius.circular(radius),
+            boxShadow: hasshadow
+                ? [
+                    BoxShadow(
+                      color: kDynamicShadow(context),
+                      offset: const Offset(0, 4),
+                      blurRadius: 8,
+                    ),
+                  ]
+                : [],
           ),
           child: Material(
             color: Colors.transparent,
             child: Center(
               child: isLoading
-                  ? SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          loaderColor ?? Colors.white,
-                        ),
-                      ),
-                    )
+                  ? FunicaLoader(color: effectiveLoaderColor) // Pass the loader color
                   : Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -253,19 +257,20 @@ class MyButton extends StatelessWidget {
                           Padding(
                             padding: isleft
                                 ? const EdgeInsets.only(left: 10.0)
-                                : const EdgeInsets.only(right: 2),
+                                : const EdgeInsets.only(right: 6),
                             child: CommonImageView(
                               imagePath: choiceIcon,
                               height: 18,
+                              color: txtColor,
                             ),
                           ),
                         MyText(
-                          paddingLeft: hasicon ? 10 : 0,
+                          paddingLeft: hasicon ? 8 : 0,
                           text: buttonText,
                           fontFamily: AppFonts.Figtree,
                           size: fontSize ?? 16,
                           letterSpacing: 0.5,
-                          color: fontColor ?? kWhite,
+                          color: txtColor,
                           weight: fontWeight ?? FontWeight.w800,
                         ),
                       ],
@@ -276,9 +281,20 @@ class MyButton extends StatelessWidget {
       ),
     );
   }
+
+  // Helper method to determine the best loader color for the button background
+  Color _getLoaderColorForButton(Color? buttonBgColor, BuildContext context) {
+    if (buttonBgColor == null) {
+      return kDynamicText(context); // Fallback to text color
+    }
+    
+    // Calculate the brightness of the button background
+    final brightness = ThemeData.estimateBrightnessForColor(buttonBgColor);
+    
+    // Return contrasting color based on button background
+    return brightness == Brightness.dark ? kWhite : kBlack;
+  }
 }
-
-
 // ignore: must_be_immutable
 class MyBorderButton extends StatelessWidget {
   MyBorderButton({
@@ -347,10 +363,9 @@ class MyBorderButton extends StatelessWidget {
           height: height,
           width: width,
           decoration: BoxDecoration(
-            color:
-                isactive
-                    ? backgroundColor ?? kTransperentColor
-                    : backgroundColor ?? Color(0xff0E1A34).withOpacity(0.35),
+            color: isactive
+                ? backgroundColor ?? kTransperentColor
+                : backgroundColor ?? Color(0xff0E1A34).withOpacity(0.35),
             border: Border.all(color: outlineColor ?? kBorderColor),
             borderRadius: BorderRadius.circular(radius),
           ),
@@ -361,10 +376,9 @@ class MyBorderButton extends StatelessWidget {
               children: [
                 if (hasicon)
                   Padding(
-                    padding:
-                        isleft
-                            ? const EdgeInsets.only(left: 10.0)
-                            : const EdgeInsets.only(right: 0),
+                    padding: isleft
+                        ? const EdgeInsets.only(left: 10.0)
+                        : const EdgeInsets.only(right: 0),
                     child: CommonImageView(imagePath: choiceIcon, height: 16),
                   ),
                 MyText(
@@ -578,12 +592,11 @@ class MyGradientButton extends StatelessWidget {
           height: height,
           width: width,
           decoration: BoxDecoration(
-            color:
-                hasgrad
-                    ? null
-                    : (isactive
-                        ? backgroundColor ?? kPrimaryColor
-                        : backgroundColor?.withOpacity(0.35) ??
+            color: hasgrad
+                ? null
+                : (isactive
+                      ? backgroundColor ?? kPrimaryColor
+                      : backgroundColor?.withOpacity(0.35) ??
                             Color(0xff0E1A34).withOpacity(0.35)),
             gradient: hasgrad ? gradient : null,
             border: Border.all(color: outlineColor),
@@ -596,10 +609,9 @@ class MyGradientButton extends StatelessWidget {
               children: [
                 if (hasicon)
                   Padding(
-                    padding:
-                        isleft
-                            ? const EdgeInsets.only(left: 20.0)
-                            : const EdgeInsets.only(right: 10),
+                    padding: isleft
+                        ? const EdgeInsets.only(left: 20.0)
+                        : const EdgeInsets.only(right: 10),
                     child: CommonImageView(imagePath: choiceIcon, height: 16),
                   ),
                 MyText(

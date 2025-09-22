@@ -1,209 +1,199 @@
-// import 'package:flutter/material.dart';
-// import 'package:formify/constants/export.dart';
-// import 'package:formify/views/auth/authscreen.dart';
-// import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:flutter/foundation.dart';
+import 'package:funica/constants/export.dart';
+import 'package:funica/views/auth/sign-in.dart';
+import 'package:funica/views/auth/sign-up.dart';
+import 'package:funica/views/home/home-screen.dart';
 
-// class InitialScreen extends StatefulWidget {
-//   const InitialScreen({super.key});
+class InitialView extends StatefulWidget {
+  const InitialView({super.key});
+
+  @override
+  State<InitialView> createState() => _InitialViewState();
+}
+
+class _InitialViewState extends State<InitialView> {
+  @override
+  Widget build(BuildContext context) {
+    return GetBuilder<ThemeController>(
+      builder: (themeController) {
+        final bool isDarkMode = themeController.isDarkMode;
+
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          value: SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: isDarkMode
+                ? Brightness.light
+                : Brightness.dark,
+            systemNavigationBarColor: kDynamicScaffoldBackground(context),
+            systemNavigationBarIconBrightness: isDarkMode
+                ? Brightness.light
+                : Brightness.dark,
+          ),
+          child: Scaffold(
+            backgroundColor: kDynamicScaffoldBackground(context),
+            body: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.asset(
+                  Assets.art,
+                  fit: BoxFit.cover,
+                  cacheWidth: 1080,
+                ),
+
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.center,
+                      colors: [Colors.transparent, Colors.black],
+                    ),
+                  ),
+                ),
+
+                // Foreground Content
+                SafeArea(
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          MyText(
+                            text: 'Funica',
+                            color: kWhite,
+                            size: 40,
+                            weight: FontWeight.bold,
+                          ),
+                          const Gap(10),
+                          MyText(
+                            text: 'Everything You Need, Nothing You Don\'t'.tr,
+                            color: kWhite,
+                            size: 20,
+                            weight: FontWeight.bold,
+                          ),
+
+                          MyText(
+                            text:
+                                'Discover a world of products tailored to your needs. Shop smart, live better.'
+                                    .tr,
+                            color: kWhite,
+                            size: 14,
+                            weight: FontWeight.w400,
+                            textAlign: TextAlign.center,
+                          ),
+                          const Gap(30),
+
+                          // Usage in your button
+                          MyButtonWithIcon(
+                            text: 'Sign-In with email'.tr,
+                            icon: Icons.email,
+                            onTap: () {
+                              Get.to(
+                                const SignInScreen(),
+                                transition: Transition.cupertino,
+                                duration: const Duration(milliseconds: 500),
+                              );
+                            },
+                            color: kPrimaryColor,
+                            textColor: kWhite,
+                          ),
+
+                          const Gap(20),
+                          MyButtonWithIcon(
+                            text: 'Explore As Guest'.tr,
+                            icon: Icons.person,
+                            onTap: () {
+                              Get.to(
+                                HomeScreen(),
+                                transition: Transition.cupertino,
+                                duration: const Duration(milliseconds: 500),
+                              );
+                            },
+                            color: kWhite,
+
+                            textColor: kPrimaryColor,
+                          ),
+                          const Gap(20),
+                          MyButtonWithIcon(
+                            text: 'Sign-up with email'.tr,
+                            icon: Icons.email,
+                            onTap: () { Get.to(
+                                const SignUpScreen(),
+                                transition: Transition.cupertino,
+                                duration: const Duration(milliseconds: 500),
+                              );
+
+                            },
+                            color: kPrimaryColor,
+                            textColor: kWhite,
+                          ),
+                          const Gap(50),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                 if (kDebugMode)
+                      Positioned(
+                        top: 20,
+                        right: 20,
+                        child: FloatingActionButton(
+                          mini: true,
+                          backgroundColor: kDynamicBackground(context),
+                          onPressed: () => themeController.toggleTheme(),
+                          child: Icon(
+                            isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                            color: kDynamicIcon(context),
+                          ),
+                        ),
+                      ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+
+// class YourScreen extends StatefulWidget {
+//   const YourScreen({super.key});
 
 //   @override
-//   State<InitialScreen> createState() => _InitialScreenState();
+//   State<YourScreen> createState() => _YourScreenState();
 // }
 
-// class _InitialScreenState extends State<InitialScreen> {
-//   final PageController _pageController = PageController();
-//   final PageController _bottomPageController = PageController();
-//   int _currentPage = 0;
-
-//   final List<Map<String, String>> onboardingData = [
-//     {
-//       'title': 'Endless Choices\nJust For You',
-//       'description':
-//           'From daily basis to premium finds, explore the world of products curated to meet your needs.',
-//       'image': '',
-//     },
-//     {
-//       'title': 'Personalized Experience\nJust For You',
-//       'description':
-//           'Get recommendations tailored exactly to your unique shopping preferences and personal habits.',
-//       'image': '',
-//     },
-//     {
-//       'title': 'Seamless Shopping\nJust For You',
-//       'description':
-//           'Enjoy a smooth, stress-free journey from browsing items to a quick and easy checkout process.',
-//       'image': '',
-//     },
-//   ];
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     // Sync both page controllers
-//     _pageController.addListener(_syncPageView);
-//   }
-
-//   void _syncPageView() {
-//     if (_pageController.page != _currentPage) {
-//       _bottomPageController.animateToPage(
-//         _pageController.page!.round(),
-//         duration: const Duration(milliseconds: 300),
-//         curve: Curves.easeInOut,
-//       );
-//       setState(() {
-//         _currentPage = _pageController.page!.round();
-//       });
-//     }
-//   }
-
-//   @override
-//   void dispose() {
-//     _pageController.removeListener(_syncPageView);
-//     _pageController.dispose();
-//     _bottomPageController.dispose();
-//     super.dispose();
-//   }
-
-//   void _nextPage() {
-//     if (_currentPage < onboardingData.length - 1) {
-//       _pageController.nextPage(
-//         duration: const Duration(milliseconds: 300),
-//         curve: Curves.easeInOut,
-//       );
-//     } else {
-//       Get.to(
-//         Authscreen(),
-//         transition: Transition.rightToLeftWithFade,
-//         duration: const Duration(milliseconds: 500),
-//       );
-//     }
-//   }
-
-//   void _skipToEnd() {
-//     _pageController.animateToPage(
-//       onboardingData.length - 1,
-//       duration: const Duration(milliseconds: 300),
-//       curve: Curves.easeInOut,
-//     );
-//   }
-
+// class _YourScreenState extends State<YourScreen> {
 //   @override
 //   Widget build(BuildContext context) {
-//     return Scaffold(
-//       backgroundColor: kPrimaryColor,
-//       body: SafeArea(
-//         child: Padding(
-//           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 26.0),
-//           child: Column(
-//             mainAxisAlignment: MainAxisAlignment.end,
-//             crossAxisAlignment: CrossAxisAlignment.start,
-//             children: [
-//               Expanded(
-//                 child: PageView.builder(
-//                   controller: _pageController,
-//                   itemCount: onboardingData.length,
-//                   onPageChanged: (int page) {
-//                     setState(() {
-//                       _currentPage = page;
-//                     });
-//                   },
-//                   itemBuilder: (context, index) {
-//                     return Column(
-//                       mainAxisAlignment: MainAxisAlignment.center,
-//                       children: [
-//                         Container(
-//                           height: 200,
-//                           width: 200,
-//                           decoration: BoxDecoration(
-//                             color: kWhite.withOpacity(0.2),
-//                             shape: BoxShape.circle,
-//                           ),
-//                           child: Icon(
-//                             Icons.shopping_bag,
-//                             size: 100,
-//                             color: kWhite,
-//                           ),
-//                         ),
-//                       ],
-//                     );
-//                   },
-//                 ),
-//               ),
+//     return GetBuilder<ThemeController>(
+//       builder: (themeController) {
+//         final bool isDarkMode = themeController.isDarkMode;
 
-//               const Gap(30),
-//               Align(
-//                 alignment: Alignment.center,
-//                 child: SmoothPageIndicator(
-//                   controller: _pageController,
-//                   count: onboardingData.length,
-//                   effect: WormEffect(
-//                     dotHeight: 6,
-//                     dotWidth: 16.0,
-//                     activeDotColor: kWhite,
-//                     dotColor: kWhite.withOpacity(0.5),
-//                   ),
-//                   onDotClicked: (index) {
-//                     _pageController.animateToPage(
-//                       index,
-//                       duration: const Duration(milliseconds: 300),
-//                       curve: Curves.easeInOut,
-//                     );
-//                   },
-//                 ),
-//               ),
-//               const Gap(30),
-
-//               // Bottom container with PageView for text content
-//               Container(
-//                 height: 300,
-//                 width: double.infinity,
-//                 decoration: BoxDecoration(
-//                   color: kWhite,
-//                   borderRadius: BorderRadius.circular(30),
-//                 ),
-//                 child: PageView.builder(
-//                   controller: _bottomPageController,
-//                   physics:
-//                       const NeverScrollableScrollPhysics(), // Disable manual scrolling
-//                   itemCount: onboardingData.length,
-//                   itemBuilder: (context, index) {
-//                     return Padding(
-//                       padding: const EdgeInsets.all(20.0),
-//                       child: Column(
-//                         children: [
-//                           MyText(
-//                             textAlign: TextAlign.center,
-//                             text: onboardingData[index]['title']!,
-//                             size: 30,
-//                             weight: FontWeight.bold,
-//                             color: kPrimaryColor,
-//                           ),
-//                           const Gap(10),
-//                           MyText(
-//                             textAlign: TextAlign.center,
-//                             text: onboardingData[index]['description']!,
-//                             size: 16,
-//                             weight: FontWeight.normal,
-//                             color: kSubText,
-//                           ),
-//                           const Gap(20),
-//                           MyButton(
-//                             buttonText:
-//                                 _currentPage == onboardingData.length - 1
-//                                 ? 'Get Started'
-//                                 : 'Next',
-//                             onTap: _nextPage,
-//                           ),
-//                         ],
-//                       ),
-//                     );
-//                   },
-//                 ),
-//               ),
-//             ],
+//         return AnnotatedRegion<SystemUiOverlayStyle>(
+//           value: SystemUiOverlayStyle(
+//             statusBarColor: Colors.transparent,
+//             statusBarIconBrightness: isDarkMode
+//                 ? Brightness.light
+//                 : Brightness.dark,
+//             systemNavigationBarColor: kDynamicBackground(context),
+//             systemNavigationBarIconBrightness: isDarkMode
+//                 ? Brightness.light
+//                 : Brightness.dark,
 //           ),
-//         ),
-//       ),
+//           child: Scaffold(
+//             backgroundColor: kDynamicScaffoldBackground(context),
+//             appBar: CustomAppBar(
+//               title: 'Your Title'.tr,
+//               showLeading: true,
+//             ),
+//             body: SafeArea(
+//               child: YourContent(),
+//             ),
+//           ),
+//         );
+//       },
 //     );
 //   }
 // }
