@@ -1,7 +1,121 @@
 import 'package:funica/constants/export.dart';
+import 'package:funica/views/auth/sign-in.dart';
 import 'package:funica/widget/bottomsheets/bottomsheet.dart';
 
 class DialogHelper {
+ static void showPasswordResetSuccessDialog() {
+    Get.dialog(
+      Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: kWhite,
+              borderRadius: BorderRadius.all(Radius.circular(12)),
+            ),
+            child: Column(
+              children: [
+                CircleAvatar(
+                  radius: 46,
+                  backgroundColor: Colors.green.shade100,
+                  child: const Icon(Icons.check, size: 40, color: Colors.green),
+                ),
+                const Gap(20),
+                MyText(
+                  text: "Password Reset Successful!".tr,
+                  size: 20,
+                  color: kBlack,
+                  weight: FontWeight.w700,
+                  textAlign: TextAlign.center,
+                ),
+                const Gap(10),
+                MyText(
+                  text: "Your password has been changed successfully. You can now login with your new password.".tr,
+                  size: 14,
+                  color: kSubText,
+                  paddingBottom: 16,
+                  weight: FontWeight.w400,
+                  textAlign: TextAlign.center,
+                ),
+                MyButton(
+                  buttonText: "Continue to Login".tr,
+                  onTap: () {
+                    Get.back();
+                    Get.off(() => SignInScreen());
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static void showSuccessDialog() {
+  Get.dialog(
+    Center(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: kWhite,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Avatar / Icon
+            CircleAvatar(
+              radius: 40,
+              backgroundColor: Colors.grey.shade200,
+              child: const Icon(Icons.person, size: 40, color: Colors.black),
+            ),
+            const SizedBox(height: 20),
+
+            MyText(
+              text: "Congratulations!".tr,
+              size: 20,
+              weight: FontWeight.w700,
+              color: kBlack,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 10),
+
+            MyText(
+              text: "Your account is ready to use.".tr,
+              size: 14,
+              color: kSubText,
+              textAlign: TextAlign.center,
+            ),
+
+            const SizedBox(height: 20),
+
+            // ✅ Next Button
+            MyButton(
+              buttonText: "Next".tr,
+              onTap: () {
+                Get.back(); // close dialog
+                // Get.offAll(
+                //   () => InitialScreen(),
+                //   transition: Transition.circularReveal,
+                //   duration: const Duration(milliseconds: 600),
+                // );
+              },
+            ),
+          ],
+        ),
+      ),
+    ),
+    barrierDismissible: false,
+  );
+}
+
+  
+  
   static void AllowlocationDialog(BuildContext context) {
     Get.dialog(
       Column(

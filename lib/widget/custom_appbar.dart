@@ -33,7 +33,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool showAvatarIcon;
   final bool showBasketIcon;
   final bool showMessageIcon;
-  final bool showBackIcon;
 
   const CustomAppBar({
     super.key,
@@ -48,7 +47,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.showAvatarIcon = false,
     this.showBasketIcon = false,
     this.showMessageIcon = false,
-    this.showBackIcon = false,
   });
 
   String get currentLangCode => Get.locale?.languageCode ?? 'en';
@@ -64,194 +62,79 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
     );
 
-    final backIconRight = Row(
-      children: [
-        CommonImageView(
-          imagePath: Assets.imagesArrowBack,
-          height: 32,
-          color: kDynamicIcon(context),
-        ),
-        const Gap(10),
-      ],
-    );
-
     return InkWell(
       onTap: onBackTap ?? () => Get.back(),
-      child: isRTL ? Transform.flip(flipX: true, child: backIconRight) : backIcon,
+      child: isRTL ? Transform.flip(flipX: true, child: backIcon) : backIcon,
     );
-  }
-
-  List<Widget> _buildOptionalIconsArabic(BuildContext context) {
-    List<Widget> optionalActions = [];
-
-    if (showAvatarIcon) {
-      optionalActions.add(
-        Padding(
-          padding: const EdgeInsets.only(left: 8, right: 8),
-          child: Bounce(
-            onTap: () {},
-            child: CommonImageView(
-              imagePath: Assets.imagesAppbarAvatar,
-              height: 36,
-            ),
-          ),
-        ),
-      );
-    }
-    if (showNotificationIcon) {
-      optionalActions.add(
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: Bounce(
-            onTap: () {},
-            child: CommonImageView(
-              imagePath: Assets.imagesNotificationIcon,
-              height: 36,
-              color: kDynamicIcon(context),
-            ),
-          ),
-        ),
-      );
-    }
-    if (showBasketIcon) {
-      optionalActions.add(
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: Bounce(
-            onTap: () {},
-            child: CommonImageView(
-              imagePath: Assets.imagesBasketIcon,
-              height: 36,
-              color: kDynamicIcon(context),
-            ),
-          ),
-        ),
-      );
-    }
-    if (showMessageIcon) {
-      optionalActions.add(
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: Bounce(
-            onTap: () {},
-            child: CommonImageView(
-              imagePath: Assets.imagesMessageIcon,
-              height: 36,
-              color: kDynamicIcon(context),
-            ),
-          ),
-        ),
-      );
-    }
-
-    return optionalActions;
-  }
-
-  List<Widget> _buildOptionalIconsEnglish(BuildContext context) {
-    List<Widget> optionalActions = [];
-
-    if (showMessageIcon) {
-      optionalActions.add(
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: Bounce(
-            onTap: () {},
-            child: CommonImageView(
-              imagePath: Assets.imagesMessageIcon,
-              height: 36,
-              color: kDynamicIcon(context),
-            ),
-          ),
-        ),
-      );
-    }
-    if (showBasketIcon) {
-      optionalActions.add(
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: Bounce(
-            onTap: () {},
-            child: CommonImageView(
-              imagePath: Assets.imagesBasketIcon,
-              height: 36,
-              color: kDynamicIcon(context),
-            ),
-          ),
-        ),
-      );
-    }
-    if (showNotificationIcon) {
-      optionalActions.add(
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: Bounce(
-            onTap: () {},
-            child: CommonImageView(
-              imagePath: Assets.imagesNotificationIcon,
-              height: 36,
-              color: kDynamicIcon(context),
-            ),
-          ),
-        ),
-      );
-    }
-    if (showAvatarIcon) {
-      optionalActions.add(
-        Padding(
-          padding: const EdgeInsets.only(left: 8, right: 8),
-          child: Bounce(
-            onTap: () {},
-            child: CommonImageView(
-              imagePath: Assets.imagesAppbarAvatar,
-              height: 36,
-            ),
-          ),
-        ),
-      );
-    }
-
-    return optionalActions;
   }
 
   List<Widget> _buildOptionalIcons(BuildContext context) {
-    List<Widget> icons =
-        isRTL ? _buildOptionalIconsArabic(context) : _buildOptionalIconsEnglish(context);
-    return icons.map((icon) {
-      return InkWell(onTap: () {}, child: icon);
+    final List<Map<String, dynamic>> iconConfigs = [
+      {
+        'show': showMessageIcon,
+        'asset': Assets.imagesMessageIcon,
+        'padding': const EdgeInsets.symmetric(horizontal: 4),
+      },
+      {
+        'show': showBasketIcon,
+        'asset': Assets.imagesBasketIcon,
+        'padding': const EdgeInsets.symmetric(horizontal: 4),
+      },
+      {
+        'show': showNotificationIcon,
+        'asset': Assets.imagesNotificationIcon,
+        'padding': const EdgeInsets.symmetric(horizontal: 4),
+      },
+      {
+        'show': showAvatarIcon,
+        'asset': Assets.imagesAppbarAvatar,
+        'padding': const EdgeInsets.symmetric(horizontal: 8),
+      },
+    ];
+
+    // Reverse for RTL to maintain visual order
+    final orderedConfigs = isRTL ? iconConfigs.reversed.toList() : iconConfigs;
+
+    return orderedConfigs.where((config) => config['show'] as bool).map((config) {
+      return Padding(
+        padding: config['padding'] as EdgeInsets,
+        child: Bounce(
+          onTap: () {}, // Add actual handlers here
+          child: CommonImageView(
+            imagePath: config['asset'] as String,
+            height: 36,
+            color: config['asset'] != Assets.imagesAppbarAvatar 
+                ? kDynamicIcon(context) 
+                : null,
+          ),
+        ),
+      );
     }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
+    final optionalIcons = _buildOptionalIcons(context);
+    final hasOptionalIcons = optionalIcons.isNotEmpty;
+    
     return Animate(
       effects: [FadeEffect(duration: const Duration(milliseconds: 500))],
       child: AppBar(
         centerTitle: centerTitle,
         backgroundColor: kDynamicScaffoldBackground(context),
         automaticallyImplyLeading: false,
-        leading: isRTL
-            ? Row(
-                spacing: 4,
-                mainAxisSize: MainAxisSize.min,
-                children: _buildOptionalIcons(context),
-              )
-            : (showLeading ? _buildBackButton(context) : null),
-        leadingWidth: isRTL ? (_buildOptionalIcons(context).length * 0.0) : null,
-        titleSpacing: -10,
-        title: Align(
-          alignment: isRTL ? Alignment.centerRight : Alignment.centerLeft,
-          child: MyText(
-            text: title ?? "",
-            size: textSize,
-            color: kDynamicText(context),
-            weight: FontWeight.w700,
-            textAlign: textAlign ?? (isRTL ? TextAlign.right : TextAlign.left),
-          ),
+        leading: showLeading ? _buildBackButton(context) : null,
+        title: MyText(
+          text: title ?? "",
+          size: textSize,
+          color: kDynamicText(context),
+          weight: FontWeight.w700,
+          textAlign: textAlign ?? (isRTL ? TextAlign.right : TextAlign.left),
         ),
         actions: [
-          if (isRTL && showLeading) _buildBackButton(context),
-          if (!isRTL) ..._buildOptionalIcons(context),
+          if (hasOptionalIcons && !isRTL) ...optionalIcons,
           if (actions != null) ...actions!,
+          if (hasOptionalIcons && isRTL) ...optionalIcons,
           const Gap(10),
         ],
       ),
@@ -261,6 +144,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
+
+
 
 class CustomAppBar2 extends StatelessWidget implements PreferredSizeWidget {
   final String? title;

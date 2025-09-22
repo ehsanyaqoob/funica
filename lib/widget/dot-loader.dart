@@ -1,13 +1,18 @@
 import 'dart:math';
 import 'package:funica/constants/export.dart';
 import 'package:flutter/material.dart';
+import 'package:funica/config/theme/theme-cont.dart';
+import 'package:get/get.dart';
 
 class FunicaLoader extends StatefulWidget {
   static const int dotCount = 5;
-  static const double size = 32;
+  static const double size = 26;
   static const double dotSize = 6;
+  
+  // Optional parameter to override color if needed
+  final Color? color;
 
-  const FunicaLoader({super.key});
+  const FunicaLoader({super.key, this.color});
 
   @override
   State<FunicaLoader> createState() => _FunicaLoaderState();
@@ -31,25 +36,29 @@ class _FunicaLoaderState extends State<FunicaLoader>
     super.dispose();
   }
 
-  Color _loaderColor(BuildContext context) =>
-      Theme.of(context).brightness == Brightness.dark
-          ? kSecondaryColor
-          : kPrimaryColor;
-
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: FunicaLoader.size,
-      height: FunicaLoader.size,
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, _) => CustomPaint(
-          painter: _DotsPainter(
-            progress: _controller.value,
-            color: _loaderColor(context),
+    return GetBuilder<ThemeController>(
+      builder: (themeController) {
+        final bool isDarkMode = themeController.isDarkMode;
+        
+        // Use provided color or fall back to the same logic as text colors
+        final Color loaderColor = widget.color ?? (isDarkMode ? kWhite : kBlack);
+        
+        return SizedBox(
+          width: FunicaLoader.size,
+          height: FunicaLoader.size,
+          child: AnimatedBuilder(
+            animation: _controller,
+            builder: (context, _) => CustomPaint(
+              painter: _DotsPainter(
+                progress: _controller.value,
+                color: loaderColor,
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

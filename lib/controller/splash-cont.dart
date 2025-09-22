@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:funica/views/intial.dart';
 import 'package:get/get.dart';
 
 class SplashController extends GetxController {
@@ -27,7 +28,7 @@ class SplashController extends GetxController {
       if (elapsed >= totalDuration) {
         timer.cancel();
         progressValue.value = 1.0;
-       // navigateToNextScreen();
+      navigateToNextScreen();
       } else {
         progressValue.value =
             elapsed.inMilliseconds / totalDuration.inMilliseconds;
@@ -36,10 +37,10 @@ class SplashController extends GetxController {
   }
 
   void navigateToNextScreen() {
-    // Get.to(
-    //   InitialScreen(),
-    //   transition: Transition.circularReveal,
-    //   duration: const Duration(milliseconds: 500),
-    // );
+    Get.to(
+      InitialView(),
+      transition: Transition.circularReveal,
+      duration: const Duration(milliseconds: 500),
+    );
   }
 }

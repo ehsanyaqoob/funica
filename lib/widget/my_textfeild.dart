@@ -17,7 +17,7 @@ class MyTextField extends StatefulWidget {
   final FocusNode? focusNode;
   final Color? filledColor;
   final Color? focusedFillColor;
-  bool? autoFocus;
+  final bool? autoFocus;
   final Color? bordercolor;
   final Color? hintColor;
   final Color? labelColor;
@@ -32,8 +32,10 @@ class MyTextField extends StatefulWidget {
   final double? width;
   final String? Function(String?)? validator;
   final bool? showPasswordToggle;
+  final bool? isPin;
+  final List<TextInputFormatter>? inputFormatters; // Add this line
 
-  MyTextField({
+  const MyTextField({
     super.key,
     this.controller,
     this.hint,
@@ -51,20 +53,22 @@ class MyTextField extends StatefulWidget {
     this.hintsize,
     this.prefix,
     this.suffix,
-    this.autoFocus,
+    this.autoFocus = false,
     this.labelWeight,
     this.hintWeight,
     this.keyboardType,
-    this.isReadOnly,
+    this.isReadOnly = false,
     this.onTap,
     this.bordercolor,
     this.focusBorderColor,
     this.focusNode,
-    this.radius,
+    this.radius = 20.0, 
     this.height = 58,
     this.width,
     this.validator,
     this.showPasswordToggle = false,
+    this.isPin = false,
+    this.inputFormatters, // Add this line
   });
 
   @override
@@ -97,7 +101,7 @@ class _MyTextFieldState extends State<MyTextField> {
     return IconButton(
       icon: Icon(
         _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-        color: Colors.grey,
+        color: kDynamicHintText(context),
         size: 20,
       ),
       onPressed: () {
@@ -110,6 +114,17 @@ class _MyTextFieldState extends State<MyTextField> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDarkMode = kIsDarkMode(context);
+    
+    // Default colors based on theme
+    final defaultFilledColor = isDarkMode ? kCardDark : kGreyColor2;
+    final defaultFocusedFillColor = isDarkMode ? kTileDark : kGreyContainerGreyColor2;
+    final defaultBorderColor = isDarkMode ?   kCardDark : kWhite;
+    final defaultFocusBorderColor = kDynamicText(context);
+    final defaultHintColor = kDynamicHintText(context);
+    final defaultLabelColor = kDynamicInputLabel(context);
+    final defaultTextColor = kDynamicInputText(context);
+
     return Padding(
       padding: EdgeInsets.only(bottom: widget.marginBottom ?? 0),
       child: Column(
@@ -120,22 +135,28 @@ class _MyTextFieldState extends State<MyTextField> {
               text: widget.label ?? '',
               size: widget.labelSize ?? 10,
               paddingBottom: 8,
-            color: kDynamicText(context),
+              color: widget.labelColor ?? defaultLabelColor,
               fontFamily: AppFonts.Figtree,
               weight: widget.labelWeight ?? FontWeight.w500,
             ),
           Container(
             width: widget.width ?? double.infinity,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(widget.radius ?? 8),
-              color: widget.focusedFillColor,
+              borderRadius: BorderRadius.circular(widget.radius ?? 30.0), 
+              color: widget.focusedFillColor ?? defaultFocusedFillColor,
             ),
             child: TextFormField(
               focusNode: widget.focusNode,
               onTap: widget.onTap,
               textAlignVertical: TextAlignVertical.center,
-              keyboardType: widget.keyboardType,
-              cursorColor: kPrimaryColor,
+  keyboardType: widget.isPin == true ? TextInputType.number : widget.keyboardType,
+  inputFormatters: widget.isPin == true
+      ? [LengthLimitingTextInputFormatter(1), FilteringTextInputFormatter.digitsOnly]
+      : widget.inputFormatters,
+
+  obscureText: (widget.isObSecure ?? false) && !_isPasswordVisible,
+  obscuringCharacter: '•', // nicer than * for PIN
+
               maxLines: widget.maxLines ?? 1,
               readOnly: widget.isReadOnly ?? false,
               controller: widget.controller,
@@ -144,76 +165,80 @@ class _MyTextFieldState extends State<MyTextField> {
                 FocusManager.instance.primaryFocus?.unfocus();
               },
               onChanged: widget.onChanged,
-              obscureText: (widget.isObSecure ?? false) && !_isPasswordVisible,
-              obscuringCharacter: '*',
+             
               validator: widget.validator,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
                 fontFamily: AppFonts.Figtree,
                 decoration: TextDecoration.none,
-                color: kBlack,
+                color: defaultTextColor,
               ),
               decoration: InputDecoration(
-  filled: true,
-  fillColor: _isFocused
-      ? widget.focusedFillColor ?? Colors.grey[100]
-      : widget.filledColor ?? Colors.grey[100],
-  focusedBorder: OutlineInputBorder(
-    borderRadius: BorderRadius.circular(widget.radius ?? 8),
-    borderSide: BorderSide(
-      color: widget.focusBorderColor ?? kPrimaryColor,
-      width: 1,
-    ),
-  ),
-  enabledBorder: OutlineInputBorder(
-    borderRadius: BorderRadius.circular(widget.radius ?? 8),
-    borderSide: BorderSide(
-      color: _isFocused
-          ? widget.focusBorderColor ?? kPrimaryColor
-          : widget.bordercolor ?? Colors.transparent,
-      width: 1,
-    ),
-  ),
-  prefixIcon: Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 12),
-    child: widget.prefix,
-  ),
-  prefixIconConstraints: const BoxConstraints(
-    minWidth: 40,
-    minHeight: 40,
-  ),
-  suffixIcon: Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 12),
-    child: widget.showPasswordToggle == true
-        ? _buildPasswordToggle()
-        : widget.suffix,
-  ),
-  suffixIconConstraints: const BoxConstraints(
-    minWidth: 40,
-    minHeight: 40,
-  ),
-  contentPadding: const EdgeInsets.symmetric(
-    horizontal: 12,
-    vertical: 16,
-  ),
-  hintText: widget.hint,
-  hintStyle: TextStyle(
-    fontSize: widget.hintsize ?? 14,
-    fontFamily: AppFonts.Figtree,
-    color: widget.hintColor ?? kSubText,
-    fontWeight: widget.hintWeight ?? FontWeight.w400,
-  ),
-  errorBorder: OutlineInputBorder(
-    borderRadius: BorderRadius.circular(widget.radius ?? 8),
-    borderSide: const BorderSide(width: 1, color: Colors.red),
-  ),
-  focusedErrorBorder: OutlineInputBorder(
-    borderRadius: BorderRadius.circular(widget.radius ?? 8),
-    borderSide: const BorderSide(width: 1, color: Colors.red),
-  ),
-),
-
+                filled: true,
+                fillColor: _isFocused
+                    ? widget.focusedFillColor ?? defaultFocusedFillColor
+                    : widget.filledColor ?? defaultFilledColor,
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(widget.radius ?? 20.0), // Changed to 30.0
+                  borderSide: BorderSide(
+                    color: widget.focusBorderColor ?? defaultFocusBorderColor,
+                    width: 1.5,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(widget.radius ?? 20.0), // Changed to 30.0
+                  borderSide: BorderSide(
+                    color: _isFocused
+                        ? widget.focusBorderColor ?? defaultFocusBorderColor
+                        : widget.bordercolor ?? defaultBorderColor,
+                    width: 1,
+                  ),
+                ),
+                prefixIcon: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: widget.prefix,
+                ),
+                prefixIconConstraints: const BoxConstraints(
+                  minWidth: 40,
+                  minHeight: 40,
+                ),
+                suffixIcon: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: widget.showPasswordToggle == true
+                      ? _buildPasswordToggle()
+                      : widget.suffix,
+                ),
+                suffixIconConstraints: const BoxConstraints(
+                  minWidth: 40,
+                  minHeight: 40,
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
+                hintText: widget.hint,
+                hintStyle: TextStyle(
+                  fontSize: widget.hintsize ?? 14,
+                  fontFamily: AppFonts.Figtree,
+                  color: widget.hintColor ?? defaultHintColor,
+                  fontWeight: widget.hintWeight ?? FontWeight.w400,
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(widget.radius ?? 20.0), // Changed to 30.0
+                  borderSide: BorderSide(
+                    width: 1,
+                    color: kDynamicError(context),
+                  ),
+                ),
+                focusedErrorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(widget.radius ?? 20.0), // Changed to 30.0
+                  borderSide: BorderSide(
+                    width: 1.5,
+                    color: kDynamicError(context),
+                  ),
+                ),
+              ),
             ),
           ),
         ],
