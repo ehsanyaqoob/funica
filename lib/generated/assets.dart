@@ -123,6 +123,10 @@ class Assets {
   static const String heartfilled = "assets/images/heartfilled.svg";
   static const String heartunfilled = "assets/images/heartunfilled.svg";
   static const String searchunfilled = "assets/images/searchunfilled.svg";
+    static const String filter = "assets/images/filter.svg";
+        static const String promosofa = "assets/images/promosofa.png";
+
+
   // products
   static const String sofa = "assets/images/sofa.svg";
   static const String chair = "assets/images/chair.svg";
@@ -131,7 +135,7 @@ class Assets {
   static const String lamp = "assets/images/lamp.svg";
   static const String cupboard = "assets/images/cupboard.svg";
   static const String vase = "assets/images/vase.svg";
-  static const String more = "assets/images/more.svg";
+  static const String more = "assets/images/morefilled.svg";
 
   /// Assets for imagesFax
   /// assets/images/fax.png

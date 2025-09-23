@@ -62,7 +62,7 @@ class MyTextField extends StatefulWidget {
     this.bordercolor,
     this.focusBorderColor,
     this.focusNode,
-    this.radius = 20.0, 
+    this.radius = 20.0,
     this.height = 58,
     this.width,
     this.validator,
@@ -115,11 +115,13 @@ class _MyTextFieldState extends State<MyTextField> {
   @override
   Widget build(BuildContext context) {
     final bool isDarkMode = kIsDarkMode(context);
-    
+
     // Default colors based on theme
     final defaultFilledColor = isDarkMode ? kCardDark : kGreyColor2;
-    final defaultFocusedFillColor = isDarkMode ? kTileDark : kGreyContainerGreyColor2;
-    final defaultBorderColor = isDarkMode ?   kCardDark : kWhite;
+    final defaultFocusedFillColor = isDarkMode
+        ? kTileDark
+        : kGreyContainerGreyColor2;
+    final defaultBorderColor = isDarkMode ? kCardDark : kWhite;
     final defaultFocusBorderColor = kDynamicText(context);
     final defaultHintColor = kDynamicHintText(context);
     final defaultLabelColor = kDynamicInputLabel(context);
@@ -142,20 +144,25 @@ class _MyTextFieldState extends State<MyTextField> {
           Container(
             width: widget.width ?? double.infinity,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(widget.radius ?? 30.0), 
+              borderRadius: BorderRadius.circular(widget.radius ?? 30.0),
               color: widget.focusedFillColor ?? defaultFocusedFillColor,
             ),
             child: TextFormField(
               focusNode: widget.focusNode,
               onTap: widget.onTap,
               textAlignVertical: TextAlignVertical.center,
-  keyboardType: widget.isPin == true ? TextInputType.number : widget.keyboardType,
-  inputFormatters: widget.isPin == true
-      ? [LengthLimitingTextInputFormatter(1), FilteringTextInputFormatter.digitsOnly]
-      : widget.inputFormatters,
+              keyboardType: widget.isPin == true
+                  ? TextInputType.number
+                  : widget.keyboardType,
+              inputFormatters: widget.isPin == true
+                  ? [
+                      LengthLimitingTextInputFormatter(1),
+                      FilteringTextInputFormatter.digitsOnly,
+                    ]
+                  : widget.inputFormatters,
 
-  obscureText: (widget.isObSecure ?? false) && !_isPasswordVisible,
-  obscuringCharacter: '•', // nicer than * for PIN
+              obscureText: (widget.isObSecure ?? false) && !_isPasswordVisible,
+              obscuringCharacter: '•', // nicer than * for PIN
 
               maxLines: widget.maxLines ?? 1,
               readOnly: widget.isReadOnly ?? false,
@@ -165,7 +172,7 @@ class _MyTextFieldState extends State<MyTextField> {
                 FocusManager.instance.primaryFocus?.unfocus();
               },
               onChanged: widget.onChanged,
-             
+
               validator: widget.validator,
               style: TextStyle(
                 fontSize: 14,
@@ -180,14 +187,18 @@ class _MyTextFieldState extends State<MyTextField> {
                     ? widget.focusedFillColor ?? defaultFocusedFillColor
                     : widget.filledColor ?? defaultFilledColor,
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(widget.radius ?? 20.0), // Changed to 30.0
+                  borderRadius: BorderRadius.circular(
+                    widget.radius ?? 20.0,
+                  ), // Changed to 30.0
                   borderSide: BorderSide(
                     color: widget.focusBorderColor ?? defaultFocusBorderColor,
                     width: 1.5,
                   ),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(widget.radius ?? 20.0), // Changed to 30.0
+                  borderRadius: BorderRadius.circular(
+                    widget.radius ?? 20.0,
+                  ), // Changed to 30.0
                   borderSide: BorderSide(
                     color: _isFocused
                         ? widget.focusBorderColor ?? defaultFocusBorderColor
@@ -225,14 +236,18 @@ class _MyTextFieldState extends State<MyTextField> {
                   fontWeight: widget.hintWeight ?? FontWeight.w400,
                 ),
                 errorBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(widget.radius ?? 20.0), // Changed to 30.0
+                  borderRadius: BorderRadius.circular(
+                    widget.radius ?? 20.0,
+                  ), // Changed to 30.0
                   borderSide: BorderSide(
                     width: 1,
                     color: kDynamicError(context),
                   ),
                 ),
                 focusedErrorBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(widget.radius ?? 20.0), // Changed to 30.0
+                  borderRadius: BorderRadius.circular(
+                    widget.radius ?? 20.0,
+                  ), // Changed to 30.0
                   borderSide: BorderSide(
                     width: 1.5,
                     color: kDynamicError(context),
