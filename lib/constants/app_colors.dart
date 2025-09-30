@@ -1,15 +1,8 @@
-import 'package:flutter/material.dart';
-import 'package:funica/config/theme/theme-cont.dart';
-import 'package:get/get.dart';
 import 'package:funica/constants/export.dart';
 
-ThemeController get _themeController => Get.find<ThemeController>();
-
-// ==================== CORE THEME DETECTION ====================
 bool kIsDarkMode(BuildContext context) =>
     Theme.of(context).brightness == Brightness.dark;
 
-// ==================== FOUNDATIONAL COLORS ====================
 Color kDynamicBackground(BuildContext context) =>
     kIsDarkMode(context) ? kDarkBackground : kLightBackground;
 
@@ -28,7 +21,6 @@ Color kDynamicText(BuildContext context) =>
 Color kDynamicIcon(BuildContext context) =>
     kIsDarkMode(context) ? kWhite : kBlack;
 
-// ==================== SURFACE & CONTAINER COLORS ====================
 Color kDynamicCard(BuildContext context) =>
     kIsDarkMode(context) ? kCardDark : kWhite;
 
@@ -44,7 +36,6 @@ Color kDynamicSurface(BuildContext context) =>
 Color kDynamicElevatedSurface(BuildContext context) =>
     kIsDarkMode(context) ? kTileDark : kGreyContainerGreyColor2;
 
-// ==================== TEXT & TYPOGRAPHY COLORS ====================
 Color kDynamicTitleText(BuildContext context) =>
     kIsDarkMode(context) ? kWhite : kBlack;
 
@@ -60,7 +51,6 @@ Color kDynamicCaptionText(BuildContext context) =>
 Color kDynamicHintText(BuildContext context) =>
     kIsDarkMode(context) ? kGreyColor4 : kGreyColor;
 
-// ==================== BORDER & DIVIDER COLORS ====================
 Color kDynamicBorder(BuildContext context) =>
     kIsDarkMode(context) ? kDividerDark : kDividerLight;
 
@@ -73,7 +63,6 @@ Color kDynamicOutline(BuildContext context) =>
 Color kDynamicSeparator(BuildContext context) =>
     kIsDarkMode(context) ? kDividerDark : kDividerColor;
 
-// ==================== INTERACTIVE & STATE COLORS ====================
 Color kDynamicButtonBackground(BuildContext context) =>
     kIsDarkMode(context) ? kPrimaryDark : kPrimaryColor;
 
@@ -96,7 +85,6 @@ Color kDynamicHighlightColor(BuildContext context) =>
 Color kDynamicSplashColor(BuildContext context) =>
     kIsDarkMode(context) ? kWhite.withOpacity(0.2) : kBlack.withOpacity(0.2);
 
-// ==================== STATUS & FEEDBACK COLORS ====================
 Color kDynamicSuccess(BuildContext context) =>
     kIsDarkMode(context) ? kgreenColor : kgreenColor;
 
@@ -121,7 +109,6 @@ Color kDynamicInfo(BuildContext context) =>
 Color kDynamicInfoBackground(BuildContext context) =>
     kIsDarkMode(context) ? kbackgroundBlueContainer : kbackgroundBlueContainer;
 
-// ==================== FORM & INPUT COLORS ====================
 Color kDynamicInputBackground(BuildContext context) =>
     kIsDarkMode(context) ? kCardDark : kWhite;
 
@@ -140,7 +127,6 @@ Color kDynamicInputLabel(BuildContext context) =>
 Color kDynamicInputError(BuildContext context) =>
     kIsDarkMode(context) ? kredColor : kredColor;
 
-// ==================== NAVIGATION & APP BAR COLORS ====================
 Color kDynamicAppBarBackground(BuildContext context) =>
     kIsDarkMode(context) ? kDarkBackground : kPrimaryColor;
 
@@ -155,14 +141,27 @@ Color kDynamicNavigationBarItem(BuildContext context) =>
 
 Color kDynamicNavigationBarSelectedItem(BuildContext context) =>
     kIsDarkMode(context) ? kPrimaryDark : kPrimaryColor;
-
 Color kDynamicTabBarBackground(BuildContext context) =>
-    kIsDarkMode(context) ? kDarkBackground : kWhite;
+    kIsDarkMode(context) ? kDarkBackground : kLightBackground;
 
 Color kDynamicTabBarIndicator(BuildContext context) =>
     kIsDarkMode(context) ? kPrimaryDark : kPrimaryColor;
 
-// ==================== LIST & GRID COLORS ====================
+Color kDynamicTabBarUnselectedText(BuildContext context) =>
+    kIsDarkMode(context) ? kTextGray : kTextDark;
+
+Color kDynamicTabBarSelectedText(BuildContext context) =>
+    kDynamicIconOnPrimary(context);
+
+Color kDynamicTabBarBorder(BuildContext context) =>
+    kIsDarkMode(context) ? kGreyColor4 : kGreyborder;
+
+Color kDynamicTabBarUnselectedBackground(BuildContext context) =>
+    kTransperentColor;
+
+Color kDynamicTabBarSelectedBorder(BuildContext context) =>
+    kDynamicPrimary(context);
+
 Color kDynamicListTileBackground(BuildContext context) =>
     kIsDarkMode(context) ? kTileDark : kTileLight;
 
@@ -178,7 +177,6 @@ Color kDynamicListDivider(BuildContext context) =>
 Color kDynamicGridItemBackground(BuildContext context) =>
     kIsDarkMode(context) ? kCardDark : kWhite;
 
-// ==================== OVERLAY & MODAL COLORS ====================
 Color kDynamicOverlay(BuildContext context) =>
     kIsDarkMode(context) ? kOverLay : klightblackColor;
 
@@ -191,7 +189,6 @@ Color kDynamicDialogBackground(BuildContext context) =>
 Color kDynamicBottomSheetBackground(BuildContext context) =>
     kIsDarkMode(context) ? kCardDark : kWhite;
 
-// ==================== SHADOW & ELEVATION COLORS ====================
 Color kDynamicShadow(BuildContext context) => kIsDarkMode(context)
     ? kAccentBlack.withOpacity(0.4)
     : kBlack.withOpacity(0.1);
@@ -200,7 +197,6 @@ Color kDynamicElevationShadow(BuildContext context) => kIsDarkMode(context)
     ? kAccentBlack.withOpacity(0.6)
     : kBlack.withOpacity(0.2);
 
-// ==================== GRADIENT & SPECIAL EFFECTS ====================
 LinearGradient kDynamicPrimaryGradient(BuildContext context) => LinearGradient(
   colors: [
     kDynamicPrimary(context),
@@ -229,9 +225,6 @@ LinearGradient kDynamicCardGradient(BuildContext context) => LinearGradient(
   end: Alignment.bottomRight,
 );
 
-// ==================== SYSTEM & ACCENT COLORS (Theme-agnostic) ====================
-// These colors remain the same in both themes for consistency
-
 Color kDynamicSystemRed(BuildContext context) => kRed;
 Color kDynamicSystemBlue(BuildContext context) => kBlue;
 Color kDynamicSystemGreen(BuildContext context) => kGreen;
@@ -240,13 +233,12 @@ Color kDynamicSystemPurple(BuildContext context) => kPurple;
 Color kDynamicSystemYellow(BuildContext context) => kYellowColor;
 Color kDynamicSystemPink(BuildContext context) => kPink;
 Color kDynamicSystemCyan(BuildContext context) => kCyran;
-// In your colors/theme file
 Color kDynamicIconOnPrimary(BuildContext context) {
-  return Theme.of(context).brightness == Brightness.dark 
-      ? Colors.black // Dark theme check color
-      : Colors.white; // Light theme check color
+  return Theme.of(context).brightness == Brightness.dark
+      ? Colors.black
+      : Colors.white;
 }
-// ==================== UTILITY FUNCTIONS ====================
+
 Color kDynamicColor(BuildContext context, Color lightColor, Color darkColor) =>
     kIsDarkMode(context) ? darkColor : lightColor;
 
@@ -256,19 +248,17 @@ Color kDynamicOpacity(
   double lightOpacity = 1.0,
   double darkOpacity = 1.0,
 }) => color.withOpacity(kIsDarkMode(context) ? darkOpacity : lightOpacity);
-/// 🎯 Loader Colors (Base Scheme Only)
+
 Color kDynamicLoaderPrimary(BuildContext context) =>
-    Theme.of(context).brightness == Brightness.dark 
-        ? kSecondaryColor        // White on dark mode
-        : kPrimaryColor;         // Black on light mode
+    Theme.of(context).brightness == Brightness.dark
+    ? kSecondaryColor
+    : kPrimaryColor;
 
 Color kDynamicLoaderBackground(BuildContext context) =>
-    Theme.of(context).brightness == Brightness.dark 
-        ? kSecondaryDark         // Dark secondary as track
-        : kSecondaryColor.withOpacity(0.2); // Light track
+    Theme.of(context).brightness == Brightness.dark
+    ? kSecondaryDark
+    : kSecondaryColor.withOpacity(0.2);
 
-
-// ==================== MATERIAL THEME EXTENSIONS ====================
 extension ThemeContextExtensions on BuildContext {
   bool get isDarkMode => kIsDarkMode(this);
 
@@ -282,12 +272,11 @@ extension ThemeContextExtensions on BuildContext {
   Color get warning => kDynamicWarning(this);
 }
 
-/// 🎨 npf base theme colors Base Theme Colors
-const kPrimaryColor = Color(0xFF000000); 
-const kPrimaryDark = Color(0xFF1C1C1E); 
+const kPrimaryColor = Color(0xFF000000);
+const kPrimaryDark = Color(0xFF1C1C1E);
 
-const kSecondaryColor = Color(0xFFFFFFFF); 
-const kSecondaryDark = Color(0xFF2C2C2E); 
+const kSecondaryColor = Color(0xFFFFFFFF);
+const kSecondaryDark = Color(0xFF2C2C2E);
 
 const kLightBackground = Color(0xFFFFFFFF);
 const kDarkBackground = Color(0xFF1C1C1E);
@@ -300,8 +289,8 @@ const kTileDark = Color(0xFF3A3A3C);
 const kBlack = Color(0xFF000000);
 const kWhite = Color(0xFFFFFFFF);
 
-const kTextDark = Color(0xFF3A3A3C); // Body text in light mode
-const kTextGray = Color(0xFF8E8E93); // Subtle text
+const kTextDark = Color(0xFF3A3A3C);
+const kTextGray = Color(0xFF8E8E93);
 
 /// System Accent Colors (Funica inspired)
 const kRed = Color(0xFFFF3B30);

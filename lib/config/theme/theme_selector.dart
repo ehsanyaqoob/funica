@@ -1,8 +1,4 @@
-// lib/widgets/theme_selector.dart
-import 'package:flutter/material.dart';
-import 'package:funica/config/theme/theme-cont.dart';
 import 'package:funica/constants/export.dart';
-import 'package:get/get.dart';
 
 class ThemeSelector extends StatelessWidget {
   const ThemeSelector({super.key});
@@ -10,7 +6,7 @@ class ThemeSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeController themeController = Get.find();
-    
+
     return Obx(() {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -36,7 +32,8 @@ class ThemeSelector extends StatelessWidget {
               ChoiceChip(
                 label: Text('System'),
                 selected: themeController.themeMode == ThemeMode.system,
-                onSelected: (_) => themeController.switchTheme(ThemeMode.system),
+                onSelected: (_) =>
+                    themeController.switchTheme(ThemeMode.system),
               ),
             ],
           ),

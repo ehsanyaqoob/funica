@@ -1,5 +1,5 @@
 import 'package:funica/constants/export.dart';
-import 'package:funica/views/splash.dart';
+import 'package:funica/Screens/splash.dart';
 
 class AppRoutes {
   static final List<GetPage> pages = [

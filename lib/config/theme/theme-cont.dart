@@ -11,7 +11,8 @@ class ThemeController extends GetxController {
   void onInit() {
     super.onInit();
     // Listen to system theme changes
-    WidgetsBinding.instance.window.onPlatformBrightnessChanged = _handleSystemThemeChange;
+    WidgetsBinding.instance.window.onPlatformBrightnessChanged =
+        _handleSystemThemeChange;
   }
 
   @override
@@ -35,7 +36,7 @@ class ThemeController extends GetxController {
     try {
       final prefs = await SharedPreferences.getInstance();
       final String? theme = prefs.getString('theme');
-      
+
       if (theme == null) {
         await switchTheme(ThemeMode.light);
       } else {
@@ -59,13 +60,14 @@ class ThemeController extends GetxController {
   }
 
   void _checkSystemTheme() {
-    final Brightness platformBrightness = WidgetsBinding.instance.window.platformBrightness;
+    final Brightness platformBrightness =
+        WidgetsBinding.instance.window.platformBrightness;
     _isDarkMode.value = platformBrightness == Brightness.dark;
   }
 
   Future<void> switchTheme(ThemeMode mode) async {
     _themeMode.value = mode;
-    
+
     if (mode == ThemeMode.light) {
       _isDarkMode.value = false;
     } else if (mode == ThemeMode.dark) {
@@ -73,7 +75,7 @@ class ThemeController extends GetxController {
     } else {
       _checkSystemTheme();
     }
-    
+
     final prefs = await SharedPreferences.getInstance();
     switch (mode) {
       case ThemeMode.light:

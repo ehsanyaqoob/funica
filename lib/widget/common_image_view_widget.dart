@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:funica/constants/export.dart';
-
 class CommonImageView extends StatelessWidget {
   final String? url;
   final String? imagePath;
@@ -9,10 +8,10 @@ class CommonImageView extends StatelessWidget {
   final File? file;
   final double? height;
   final double? width;
-  final double? radius;
+  final double radius;
   final BoxFit fit;
   final String placeHolder;
-  final Color? color; // ✅ optional color param
+  final Color? color; // ✅ tint support
 
   const CommonImageView({
     super.key,
@@ -25,100 +24,93 @@ class CommonImageView extends StatelessWidget {
     this.radius = 0.0,
     this.fit = BoxFit.cover,
     this.placeHolder = 'assets/images/no_image_found.png',
-    this.color, // ✅ added here
+    this.color,
   });
 
   @override
   Widget build(BuildContext context) {
-    return _buildImageView();
+    return Animate(
+      effects: [FadeEffect(duration: const Duration(milliseconds: 500))],
+      child: SizedBox(
+        height: height,
+        width: width,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(radius),
+          child: _buildImage(),
+        ),
+      ),
+    );
   }
 
-  Widget _buildImageView() {
+  Widget _buildImage() {
     if (svgPath != null && svgPath!.isNotEmpty) {
-      return Animate(
-        effects: [FadeEffect(duration: Duration(milliseconds: 500))],
-        child: SizedBox(
-          height: height,
-          width: width,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(radius!),
-            child: SvgPicture.asset(
-              svgPath!,
-              height: height,
-              width: width,
-              fit: fit,
-              color: color, // ✅ apply tint
-            ),
-          ),
-        ),
+      return SvgPicture.asset(
+        svgPath!,
+        height: height,
+        width: width,
+        fit: fit,
+        color: color,
       );
-    } else if (file != null && file!.path.isNotEmpty) {
-      return Animate(
-        effects: [FadeEffect(duration: Duration(milliseconds: 500))],
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(radius!),
-          child: Image.file(
-            file!,
-            height: height,
-            width: width,
-            fit: fit,
-            color: color, // ✅ apply tint
-          ),
-        ),
+    }
+
+    if (file != null && file!.path.isNotEmpty) {
+      return Image.file(
+        file!,
+        height: height,
+        width: width,
+        fit: fit,
+        color: color,
       );
-    } else if (url != null && url!.isNotEmpty) {
-      return Animate(
-        effects: [FadeEffect(duration: Duration(milliseconds: 500))],
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(radius!),
-          child: CachedNetworkImage(
-            height: height,
-            width: width,
-            fit: fit,
-            imageUrl: url!,
-            color: color, // ✅ apply tint
-            placeholder: (context, url) => SizedBox(
-              height: 23,
-              width: 23,
-              child: Center(
-                child: SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(
-                    color: kGreyColor,
-                    backgroundColor: Colors.grey.shade100,
-                  ),
-                ),
+    }
+
+    if (url != null && url!.isNotEmpty) {
+      return CachedNetworkImage(
+        height: height,
+        width: width,
+        fit: fit,
+        imageUrl: url!,
+        color: color,
+        placeholder: (context, url) => SizedBox(
+          height: 23,
+          width: 23,
+          child: Center(
+            child: SizedBox(
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: kGreyColor,
+                backgroundColor: Colors.grey.shade100,
               ),
             ),
-            errorWidget: (context, url, error) => Image.asset(
-              placeHolder,
-              height: height,
-              width: width,
-              fit: fit,
-              color: color, // ✅ tint placeholder too
-            ),
           ),
         ),
-      );
-    } else if (imagePath != null && imagePath!.isNotEmpty) {
-      return Animate(
-        effects: [FadeEffect(duration: Duration(milliseconds: 500))],
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(radius!),
-          child: Image.asset(
-            imagePath!,
-            height: height,
-            width: width,
-            fit: fit,
-            color: color, // ✅ apply tint
-          ),
+        errorWidget: (context, url, error) => Image.asset(
+          placeHolder,
+          height: height,
+          width: width,
+          fit: fit,
+          color: color,
         ),
       );
     }
-    return const SizedBox();
+
+    if (imagePath != null && imagePath!.isNotEmpty) {
+      return Image.asset(
+        imagePath!,
+        height: height,
+        width: width,
+        fit: fit,
+        color: color,
+      );
+    }
+
+    return const SizedBox(); // nothing provided
   }
 }
+
+
+
 class CommonImageViewWithoutAnimate extends StatelessWidget {
   // ignore_for_file: must_be_immutable
   String? url;

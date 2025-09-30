@@ -13,20 +13,22 @@ class UserInfoRow extends StatelessWidget {
     this.onNotificationTap,
     this.onFavoriteTap,
   }) : super(key: key);
-String getGreeting() {
-  final hour = DateTime.now().hour;
-  if (hour < 12) {
-    return 'Good Morning 👋';
-  } else if (hour < 17) {
-    return 'Good Afternoon 👋';
-  } else {
-    return 'Good Evening 👋';
+  String getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) {
+      return 'Good Morning 👋';
+    } else if (hour < 17) {
+      return 'Good Afternoon 👋';
+    } else {
+      return 'Good Evening 👋';
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
-final FillUpProfileController controller = Get.put(FillUpProfileController());
+    final FillUpProfileController controller = Get.put(
+      FillUpProfileController(),
+    );
 
     return GetBuilder<FillUpProfileController>(
       builder: (_) {
@@ -62,22 +64,21 @@ final FillUpProfileController controller = Get.put(FillUpProfileController());
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                 MyText(
-  text: getGreeting(),
-  size: 14,
-  weight: FontWeight.w600,
-  color: kDynamicText(context).withOpacity(0.7),
-),
+                  MyText(
+                    text: getGreeting(),
+                    size: 14,
+                    weight: FontWeight.w600,
+                    color: kDynamicText(context).withOpacity(0.7),
+                  ),
 
                   MyText(
-  text: controller.userName?.isNotEmpty == true
-      ? controller.userName!
-      : 'Andrew Ainsley',
-  size: 18,
-  weight: FontWeight.bold,
-  color: kDynamicText(context),
-),
-
+                    text: controller.userName?.isNotEmpty == true
+                        ? controller.userName!
+                        : 'Andrew Ainsley',
+                    size: 18,
+                    weight: FontWeight.bold,
+                    color: kDynamicText(context),
+                  ),
                 ],
               ),
             ),

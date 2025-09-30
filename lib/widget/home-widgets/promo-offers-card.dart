@@ -76,7 +76,7 @@ class _SwipeablePromoCardsState extends State<SwipeablePromoCards>
                   child: Container(
                     margin: EdgeInsets.symmetric(horizontal: 12),
                     decoration: BoxDecoration(
-                      color: kDynamicCard(context),
+                      color: kDynamicContainer(context),
                       borderRadius: BorderRadius.circular(26.0),
                       border: Border.all(
                         color: Theme.of(context).brightness == Brightness.light
