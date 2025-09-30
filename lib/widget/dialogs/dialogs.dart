@@ -1,5 +1,5 @@
 import 'package:funica/constants/export.dart';
-import 'package:funica/views/auth/sign-in.dart';
+import 'package:funica/Screens/auth/sign-in.dart';
 import 'package:funica/widget/bottomsheets/bottomsheet.dart';
 
 class DialogHelper {

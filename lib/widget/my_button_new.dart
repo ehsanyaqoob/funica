@@ -1,62 +1,64 @@
 import 'package:funica/constants/export.dart';
 import 'package:funica/widget/dot-loader.dart';
-
 class MyButtonWithIcon extends StatelessWidget {
   const MyButtonWithIcon({
     super.key,
     this.onTap,
     this.onTapWithParam,
     required this.text,
-    required this.icon,
-    this.height = 58,
+    required this.iconPath,
+    this.param,
+    this.height = 50,
     this.width,
-    this.color,
-    this.textColor,
+    this.radius = 16.0,
     this.fontSize,
-    this.outlineColor = Colors.transparent,
-    this.radius = 20,
-    this.mhoriz = 0,
-    this.mBottom = 0,
+    this.fontColor,
+    this.backgroundColor,
+    this.outlineColor,
+    this.hasShadow = false,
+    this.hasGradient = false,
+    this.isActive = true,
     this.mTop = 0,
+    this.mBottom = 0,
+    this.mHoriz = 0,
     this.fontWeight,
     this.isLoading = false,
     this.loaderColor,
-    this.param,
-    this.iconSize = 24,
     this.iconColor,
-    this.spaceBetween = 8,
-    this.hasShadow = false,
-    this.isActive = true,
+    this.iconSize = 18,
   });
 
   final String text;
-  final IconData icon;
+  final String iconPath;
+
   final VoidCallback? onTap;
   final ValueChanged<String>? onTapWithParam;
   final String? param;
 
-  final double? height;
-  final double? width;
+  final double? height, width;
   final double radius;
   final double? fontSize;
-  final double iconSize;
-  final double spaceBetween;
-  final Color outlineColor;
-  final Color? color;
-  final Color? textColor;
-  final Color? iconColor;
-  final bool hasShadow;
-  final bool isActive;
-  final double mTop, mBottom, mhoriz;
   final FontWeight? fontWeight;
-  final bool isLoading;
+  final Color? fontColor, backgroundColor, outlineColor, iconColor;
+  final double iconSize;
+
+  final bool  hasShadow, hasGradient, isActive, isLoading;
+  final double mTop, mBottom, mHoriz;
   final Color? loaderColor;
 
   @override
   Widget build(BuildContext context) {
+    final bgColor = isActive
+        ? backgroundColor ?? kDynamicButtonBackground(context)
+        : kDynamicButtonDisabled(context);
+
+    final txtColor = fontColor ?? kDynamicButtonText(context);
+    final Color effectiveLoaderColor =
+        loaderColor ?? _getLoaderColorForButton(bgColor, context);
+
     return Animate(
       effects: [
-        FadeEffect(duration: const Duration(milliseconds: 1000)),
+        FadeEffect(duration: const Duration(milliseconds: 500)),
         MoveEffect(curve: Curves.fastLinearToSlowEaseIn),
       ],
       child: Bounce(
@@ -74,80 +76,68 @@ class MyButtonWithIcon extends StatelessWidget {
           margin: EdgeInsets.only(
             top: mTop,
             bottom: mBottom,
-            left: mhoriz,
-            right: mhoriz,
+            left: mHoriz,
+            right: mHoriz,
           ),
           height: height,
           width: width,
           decoration: BoxDecoration(
-            color: isActive
-                ? color ?? kPrimaryColor
-                : color ?? const Color(0xff0E1A34).withOpacity(0.35),
-            border: Border.all(color: outlineColor),
+            color: hasGradient ? null : bgColor,
+            gradient: hasGradient ? kDynamicPrimaryGradient(context) : null,
+            border: Border.all(color: outlineColor ?? kDynamicOutline(context)),
             borderRadius: BorderRadius.circular(radius),
             boxShadow: hasShadow
                 ? [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10,
+                      color: kDynamicShadow(context),
                       offset: const Offset(0, 4),
+                      blurRadius: 8,
                     ),
                   ]
-                : null,
+                : [],
           ),
           child: Material(
             color: Colors.transparent,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(radius),
-              onTap: isLoading
-                  ? null
-                  : () {
-                      if (onTap != null) {
-                        onTap!();
-                      } else if (onTapWithParam != null && param != null) {
-                        onTapWithParam!(param!);
-                      }
-                    },
-              child: Center(
-                child: isLoading
-                    ? SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            loaderColor ?? Colors.white,
-                          ),
-                        ),
-                      )
-                    : Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          // Icon on the left
-                          Icon(
-                            icon,
-                            size: iconSize,
-                            color: iconColor ?? textColor ?? kWhite,
-                          ),
-                          SizedBox(width: spaceBetween),
-                          MyText(
-                            text: text,
-                            fontFamily: AppFonts.Figtree,
-                            size: fontSize ?? 16,
-                            letterSpacing: 0.5,
-                            color: textColor ?? kWhite,
-                            weight: fontWeight ?? FontWeight.w800,
-                          ),
-                        ],
-                      ),
-              ),
+            child: Center(
+              child: isLoading
+                  ? FunicaLoader(color: effectiveLoaderColor)
+                  : Row(
+  mainAxisAlignment: MainAxisAlignment.center,
+  children: [
+    SvgPicture.asset(
+      iconPath,
+      height: iconSize,
+      color: iconColor ?? txtColor,
+    ),
+    const SizedBox(width: 8),
+    MyText(
+      text: text,
+      fontFamily: AppFonts.Figtree,
+      size: fontSize ?? 16,
+      letterSpacing: 0.5,
+      color: txtColor,
+      weight: fontWeight ?? FontWeight.w800,
+    ),
+  ],
+)
+
+
             ),
           ),
         ),
       ),
     );
   }
+
+  Color _getLoaderColorForButton(Color? buttonBgColor, BuildContext context) {
+    if (buttonBgColor == null) {
+      return kDynamicText(context);
+    }
+    final brightness = ThemeData.estimateBrightnessForColor(buttonBgColor);
+    return brightness == Brightness.dark ? kWhite : kBlack;
+  }
 }
+
 class MyButton extends StatelessWidget {
   const MyButton({
     super.key,
@@ -295,6 +285,9 @@ class MyButton extends StatelessWidget {
     return brightness == Brightness.dark ? kWhite : kBlack;
   }
 }
+
+
+
 // ignore: must_be_immutable
 class MyBorderButton extends StatelessWidget {
   MyBorderButton({

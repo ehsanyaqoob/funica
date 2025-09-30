@@ -1,4 +1,3 @@
-export 'app_background.dart';
 export 'app_sizes.dart';
 export 'app_text_styling.dart';
 export '../config/theme/app_themes.dart';

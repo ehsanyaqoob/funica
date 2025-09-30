@@ -123,9 +123,18 @@ class Assets {
   static const String heartfilled = "assets/images/heartfilled.svg";
   static const String heartunfilled = "assets/images/heartunfilled.svg";
   static const String searchunfilled = "assets/images/searchunfilled.svg";
-    static const String filter = "assets/images/filter.svg";
-        static const String promosofa = "assets/images/promosofa.png";
-
+  static const String filter = "assets/images/filter.svg";
+  // Promo Assets
+  static const String promosofa = "assets/images/promosofa.png";
+  static const String promolamps = "assets/images/promo-lamps.png";
+  static const String promochair = "assets/images/promo-chair.png";
+  static const String promochair2 = "assets/images/promo-chair2.png";
+  // Sofa Assets
+  static const String midcenturysofa = "assets/images/mid-century-sofa.png";
+  static const String midcenturysofa2 = "assets/images/mod-century-sofa2.png";
+  static const String lowsonsofa = "assets/images/lowson-sofa.png";
+  static const String lowsonsofa2 = "assets/images/lowson-sofa2.png";
+  static const String tuxedosofa = "assets/images/tuxedo-sofa.png";
 
   // products
   static const String sofa = "assets/images/sofa.svg";
@@ -136,17 +145,45 @@ class Assets {
   static const String cupboard = "assets/images/cupboard.svg";
   static const String vase = "assets/images/vase.svg";
   static const String more = "assets/images/morefilled.svg";
+  // Reviews Assets
+  static const String starfilled = "assets/images/star-filled.svg";
+  static const String starunfilled = "assets/images/star-unfilled.svg";
+  // Chair Assets
+  static const String chair1 = "assets/images/chair1.png";
+  static const String chair2 = "assets/images/chair2.png";
+  static const String chair3 = "assets/images/chair3.png";
+  static const String chair4 = "assets/images/chair4.png";
+  static const String chair5 = "assets/images/chair5.png";
+  static const String chair6 = "assets/images/chair6.png";
 
-  /// Assets for imagesFax
-  /// assets/images/fax.png
-  static const String imagesFax = "assets/images/fax.png";
+  // Table Assets
+  // Chair Assets
+  static const String table1 = "assets/images/table1.png";
+  static const String table2 = "assets/images/table2.png";
+  static const String table3 = "assets/images/table2.png";
+  static const String table4 = "assets/images/table3.png";
+  static const String table5 = "assets/images/table4.png";
+  static const String table6 = "assets/images/table4.png";
+  static const String kitchen1 = "assets/images/kitchen1.jpg";
+  static const String kitchen2 = "assets/images/kitchen2.jpg";
+  static const String kitchen3 = "assets/images/kitchen3.jpg";
+  static const String lamp1 = "assets/images/lamp1.jpg";
+  static const String lamp2 = "assets/images/lamp2.jpg";
+  static const String lamp3 = "assets/images/lamp3.jpg";
+  static const String lamp4 = "assets/images/lamp4.jpg";
 
-  /// Assets for imagesFaxGrey
-  /// assets/images/fax_grey.png
-  static const String imagesFaxGrey = "assets/images/fax_grey.png";
+  static const String cupboard1 = "assets/images/cupboard1.jpg";
+  static const String cupboard2 = "assets/images/cupboard2.jpg";
+  static const String cupboard3 = "assets/images/cupboard3.jpg";
+  static const String vase1 = "assets/images/vase1.jpg";
+  static const String vase2 = "assets/images/vase2.jpg";
+  static const String vase3 = "assets/images/vase3.jpg";
+  static const String minus = "assets/images/minus.svg";
+  static const String add = "assets/images/add.svg";
+  static const String check = "assets/images/check.svg";
+  static const String cartfilled = "assets/images/cart-filled.svg";
+  static const String delete = "assets/images/delete.svg";
 
-  /// Assets for imagesFignerprintScan
-  /// assets/images/fignerprint_scan.png
   static const String imagesFignerprintScan =
       "assets/images/fignerprint_scan.png";
 
@@ -702,19 +739,6 @@ class Assets {
   /// assets/images/verify.png
   static const String imagesVerify = "assets/images/verify.png";
 
-  /// Assets for imagesView1
-  /// assets/images/view_1.png
-  static const String imagesView1 = "assets/images/view_1.png";
+ 
 
-  /// Assets for imagesWhiteArrowButton
-  /// assets/images/white_arrow_button.png
-  static const String imagesWhiteArrowButton =
-      "assets/images/white_arrow_button.png";
-
-  /// Assets for imagesfitneesmodel
-  static const String imagesfitneesmodel = "assets/images/3dmodelposter.png";
-
-  //
-  static const String imagesgirlfindingproducts =
-      "assets/images/girlfindingproducts.jpg";
 }

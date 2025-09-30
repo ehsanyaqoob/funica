@@ -1,5 +1,3 @@
-
-
 import 'package:funica/constants/export.dart';
 
 //call
@@ -20,7 +18,7 @@ import 'package:funica/constants/export.dart';
 //ShowTrash: true
 //ShowText
 
-class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   final String? title;
   final List<Widget>? actions;
   final VoidCallback? onBackTap;
@@ -33,6 +31,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool showAvatarIcon;
   final bool showBasketIcon;
   final bool showMessageIcon;
+  final bool enableSearch;
 
   const CustomAppBar({
     super.key,
@@ -47,7 +46,18 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.showAvatarIcon = false,
     this.showBasketIcon = false,
     this.showMessageIcon = false,
+    this.enableSearch = false,
   });
+
+  @override
+  State<CustomAppBar> createState() => _CustomAppBarState();
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+}
+
+class _CustomAppBarState extends State<CustomAppBar> {
+  bool _isSearching = false;
 
   String get currentLangCode => Get.locale?.languageCode ?? 'en';
   bool get isRTL => currentLangCode == 'ar' || currentLangCode == 'sa';
@@ -63,48 +73,59 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
 
     return InkWell(
-      onTap: onBackTap ?? () => Get.back(),
-      child: isRTL ? Transform.flip(flipX: true, child: backIcon) : backIcon,
+      onTap: () {
+        if (_isSearching) {
+          setState(() => _isSearching = false);
+        } else {
+          if (widget.onBackTap != null) {
+            widget.onBackTap!();
+          } else {
+            Get.back();
+          }
+        }
+      },
+      child: backIcon,
     );
   }
 
   List<Widget> _buildOptionalIcons(BuildContext context) {
     final List<Map<String, dynamic>> iconConfigs = [
       {
-        'show': showMessageIcon,
+        'show': widget.showMessageIcon,
         'asset': Assets.imagesMessageIcon,
         'padding': const EdgeInsets.symmetric(horizontal: 4),
       },
       {
-        'show': showBasketIcon,
+        'show': widget.showBasketIcon,
         'asset': Assets.imagesBasketIcon,
         'padding': const EdgeInsets.symmetric(horizontal: 4),
       },
       {
-        'show': showNotificationIcon,
+        'show': widget.showNotificationIcon,
         'asset': Assets.imagesNotificationIcon,
         'padding': const EdgeInsets.symmetric(horizontal: 4),
       },
       {
-        'show': showAvatarIcon,
+        'show': widget.showAvatarIcon,
         'asset': Assets.imagesAppbarAvatar,
         'padding': const EdgeInsets.symmetric(horizontal: 8),
       },
     ];
 
-    // Reverse for RTL to maintain visual order
     final orderedConfigs = isRTL ? iconConfigs.reversed.toList() : iconConfigs;
 
-    return orderedConfigs.where((config) => config['show'] as bool).map((config) {
+    return orderedConfigs.where((config) => config['show'] as bool).map((
+      config,
+    ) {
       return Padding(
         padding: config['padding'] as EdgeInsets,
         child: Bounce(
-          onTap: () {}, // Add actual handlers here
+          onTap: () {},
           child: CommonImageView(
             imagePath: config['asset'] as String,
             height: 36,
-            color: config['asset'] != Assets.imagesAppbarAvatar 
-                ? kDynamicIcon(context) 
+            color: config['asset'] != Assets.imagesAppbarAvatar
+                ? kDynamicIcon(context)
                 : null,
           ),
         ),
@@ -116,36 +137,68 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final optionalIcons = _buildOptionalIcons(context);
     final hasOptionalIcons = optionalIcons.isNotEmpty;
-    
-    return Animate(
-      effects: [FadeEffect(duration: const Duration(milliseconds: 500))],
-      child: AppBar(
-        centerTitle: centerTitle,
-        backgroundColor: kDynamicScaffoldBackground(context),
-        automaticallyImplyLeading: false,
-        leading: showLeading ? _buildBackButton(context) : null,
-        title: MyText(
-          text: title ?? "",
-          size: textSize,
-          color: kDynamicText(context),
-          weight: FontWeight.w700,
-          textAlign: textAlign ?? (isRTL ? TextAlign.right : TextAlign.left),
-        ),
-        actions: [
-          if (hasOptionalIcons && !isRTL) ...optionalIcons,
-          if (actions != null) ...actions!,
-          if (hasOptionalIcons && isRTL) ...optionalIcons,
-          const Gap(10),
-        ],
+
+    return AppBar(
+      backgroundColor: kDynamicScaffoldBackground(context),
+      automaticallyImplyLeading: false,
+      centerTitle: false,
+      leading: _isSearching
+          ? _buildBackButton(context)
+          : (widget.showLeading ? _buildBackButton(context) : null),
+      titleSpacing: 0,
+      title: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        child: _isSearching
+            ? Container(
+                key: const ValueKey('searchField'),
+                width: double.infinity,
+                margin: const EdgeInsets.only(right: 10, top: 26.0),
+                child: MyTextField(
+                  keyboardType: TextInputType.text,
+                  hint: 'Search',
+                  prefix: SvgPicture.asset(
+                    Assets.searchunfilled,
+                    height: 20,
+                    color: kDynamicIcon(context),
+                  ),
+                  suffix: SvgPicture.asset(
+                    Assets.filter,
+                    height: 20,
+                    color: kDynamicIcon(context),
+                  ),
+                  autoFocus: true,
+                ),
+              )
+            : MyText(
+                key: const ValueKey('titleText'),
+                text: widget.title ?? "",
+                size: widget.textSize,
+                color: kDynamicText(context),
+                weight: FontWeight.w700,
+                textAlign:
+                    widget.textAlign ??
+                    (isRTL ? TextAlign.right : TextAlign.left),
+              ),
       ),
+      actions: !_isSearching
+          ? [
+              if (widget.enableSearch)
+                IconButton(
+                  icon: SvgPicture.asset(
+                    Assets.searchunfilled,
+                    height: 20,
+                    color: kDynamicIcon(context),
+                  ),
+                  onPressed: () => setState(() => _isSearching = true),
+                ),
+              if (!isRTL && hasOptionalIcons) ...optionalIcons,
+              if (widget.actions != null) ...widget.actions!,
+              if (isRTL && hasOptionalIcons) ...optionalIcons,
+            ]
+          : [], // no actions while searching
     );
   }
-
-  @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
-
-
 
 class CustomAppBar2 extends StatelessWidget implements PreferredSizeWidget {
   final String? title;
@@ -195,8 +248,9 @@ class CustomAppBar2 extends StatelessWidget implements PreferredSizeWidget {
 
     return InkWell(
       onTap: onBackTap ?? () => Get.back(),
-      child:
-          isRTL ? Transform.flip(flipX: true, child: backIconRight) : backIcon,
+      child: isRTL
+          ? Transform.flip(flipX: true, child: backIconRight)
+          : backIcon,
     );
   }
 
@@ -211,7 +265,7 @@ class CustomAppBar2 extends StatelessWidget implements PreferredSizeWidget {
             onTap: () {
               // Get.to(() => const ProfileMainScreen());
               //        //                    Get.to(() => const EditProfileScreen());
-             // Get.to(() => ViewProfileMainScreen());
+              // Get.to(() => ViewProfileMainScreen());
             },
             child: CommonImageView(
               imagePath: Assets.imagesAppbarAvatar,
@@ -227,7 +281,7 @@ class CustomAppBar2 extends StatelessWidget implements PreferredSizeWidget {
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Bounce(
             onTap: () {
-             // Get.to(() => const NotificationScreen());
+              // Get.to(() => const NotificationScreen());
             },
             child: CommonImageView(
               imagePath: Assets.imagesNotificationIcon,
@@ -243,7 +297,7 @@ class CustomAppBar2 extends StatelessWidget implements PreferredSizeWidget {
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Bounce(
             onTap: () {
-             // Get.to(() => const BookingDetailsScreen());
+              // Get.to(() => const BookingDetailsScreen());
             },
             child: CommonImageView(
               imagePath: Assets.imagesBasketIcon,
@@ -259,7 +313,7 @@ class CustomAppBar2 extends StatelessWidget implements PreferredSizeWidget {
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Bounce(
             onTap: () {
-            //  Get.to(() => const ChatMainScreen());
+              //  Get.to(() => const ChatMainScreen());
             },
             child: CommonImageView(
               imagePath: Assets.imagesMessageIcon,
@@ -282,7 +336,7 @@ class CustomAppBar2 extends StatelessWidget implements PreferredSizeWidget {
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Bounce(
             onTap: () {
-           //   Get.to(() => const ChatMainScreen());
+              //   Get.to(() => const ChatMainScreen());
             },
             child: CommonImageView(
               imagePath: Assets.imagesMessageIcon,
@@ -299,7 +353,7 @@ class CustomAppBar2 extends StatelessWidget implements PreferredSizeWidget {
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Bounce(
             onTap: () {
-          //    Get.to(() => const BookingDetailsScreen());
+              //    Get.to(() => const BookingDetailsScreen());
             },
             child: CommonImageView(
               imagePath: Assets.imagesBasketIcon,
@@ -315,7 +369,7 @@ class CustomAppBar2 extends StatelessWidget implements PreferredSizeWidget {
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Bounce(
             onTap: () {
-          //    Get.to(() => const NotificationScreen());
+              //    Get.to(() => const NotificationScreen());
             },
             child: CommonImageView(
               imagePath: Assets.imagesNotificationIcon,
@@ -333,7 +387,7 @@ class CustomAppBar2 extends StatelessWidget implements PreferredSizeWidget {
             onTap: () {
               //   Get.to(() => const ProfileMainScreen());
               //                    Get.to(() => const EditProfileScreen());
-            //  Get.to(() => ViewProfileMainScreen());
+              //  Get.to(() => ViewProfileMainScreen());
             },
             child: CommonImageView(
               imagePath: Assets.imagesAppbarAvatar,
@@ -359,14 +413,13 @@ class CustomAppBar2 extends StatelessWidget implements PreferredSizeWidget {
           centerTitle: centerTitle,
           backgroundColor: kWhite,
           automaticallyImplyLeading: false,
-          leading:
-              isRTL
-                  ? Row(
-                    spacing: 4,
-                    mainAxisSize: MainAxisSize.min,
-                    children: _buildOptionalIcons(),
-                  )
-                  : (showLeading ? _buildBackButton() : null),
+          leading: isRTL
+              ? Row(
+                  spacing: 4,
+                  mainAxisSize: MainAxisSize.min,
+                  children: _buildOptionalIcons(),
+                )
+              : (showLeading ? _buildBackButton() : null),
           leadingWidth: isRTL ? (_buildOptionalIcons().length * 50.0) : null,
           title: Align(
             alignment: isRTL ? Alignment.centerRight : Alignment.centerLeft,
@@ -443,8 +496,9 @@ class CustomAppBar3 extends StatelessWidget implements PreferredSizeWidget {
 
     return InkWell(
       onTap: onBackTap ?? () => Get.back(),
-      child:
-          isRTL ? Transform.flip(flipX: true, child: backIconRight) : backIcon,
+      child: isRTL
+          ? Transform.flip(flipX: true, child: backIconRight)
+          : backIcon,
     );
   }
 
@@ -480,7 +534,7 @@ class CustomAppBar3 extends StatelessWidget implements PreferredSizeWidget {
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Bounce(
             onTap: () {
-             // Get.to(() => const AllRecentlyPlayed());
+              // Get.to(() => const AllRecentlyPlayed());
             },
             child: CommonImageView(
               imagePath: Assets.imagesNowPlayingAppbarIcon,
@@ -509,13 +563,12 @@ class CustomAppBar3 extends StatelessWidget implements PreferredSizeWidget {
           automaticallyImplyLeading: false,
           titleSpacing: -10,
 
-          leading:
-              isRTL
-                  ? Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: _buildOptionalIcons(),
-                  )
-                  : (showLeading ? _buildBackButton() : null),
+          leading: isRTL
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: _buildOptionalIcons(),
+                )
+              : (showLeading ? _buildBackButton() : null),
           leadingWidth: isRTL ? (_buildOptionalIcons().length * 50.0) : null,
           title: Align(
             alignment: isRTL ? Alignment.centerRight : Alignment.centerLeft,
@@ -584,8 +637,9 @@ class CustomAppBar4 extends StatelessWidget implements PreferredSizeWidget {
 
     return InkWell(
       onTap: onBackTap ?? () => Get.back(),
-      child:
-          isRTL ? Transform.flip(flipX: true, child: backIconRight) : backIcon,
+      child: isRTL
+          ? Transform.flip(flipX: true, child: backIconRight)
+          : backIcon,
     );
   }
 
@@ -598,7 +652,7 @@ class CustomAppBar4 extends StatelessWidget implements PreferredSizeWidget {
           padding: const EdgeInsets.only(left: 4, right: 4),
           child: Bounce(
             onTap: () {
-             // Get.to(() => const SettingsNotificationScreen());
+              // Get.to(() => const SettingsNotificationScreen());
             },
             child: CommonImageView(
               imagePath: Assets.imagesSettingsIcon,
@@ -621,7 +675,7 @@ class CustomAppBar4 extends StatelessWidget implements PreferredSizeWidget {
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Bounce(
             onTap: () {
-             // Get.to(() => const SettingsNotificationScreen());
+              // Get.to(() => const SettingsNotificationScreen());
             },
             child: CommonImageView(
               imagePath: Assets.imagesSettingsIcon,
@@ -649,13 +703,12 @@ class CustomAppBar4 extends StatelessWidget implements PreferredSizeWidget {
           backgroundColor: kbackground,
           automaticallyImplyLeading: false,
           titleSpacing: -10,
-          leading:
-              isRTL
-                  ? Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: _buildOptionalIcons(),
-                  )
-                  : (showLeading ? _buildBackButton() : null),
+          leading: isRTL
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: _buildOptionalIcons(),
+                )
+              : (showLeading ? _buildBackButton() : null),
           leadingWidth: isRTL ? (_buildOptionalIcons().length * 50.0) : null,
           title: Align(
             alignment: isRTL ? Alignment.centerRight : Alignment.centerLeft,
@@ -725,8 +778,9 @@ class CustomAppBarEditProfile extends StatelessWidget
 
     return InkWell(
       onTap: onBackTap ?? () => Get.back(),
-      child:
-          isRTL ? Transform.flip(flipX: true, child: backIconRight) : backIcon,
+      child: isRTL
+          ? Transform.flip(flipX: true, child: backIconRight)
+          : backIcon,
     );
   }
 
@@ -739,7 +793,7 @@ class CustomAppBarEditProfile extends StatelessWidget
           padding: const EdgeInsets.only(left: 4, right: 4),
           child: Bounce(
             onTap: () {
-            //  Get.to(() => const ProfileMainScreen());
+              //  Get.to(() => const ProfileMainScreen());
             },
             child: CommonImageView(
               imagePath: Assets.imagesSettingsIcon,
@@ -762,7 +816,7 @@ class CustomAppBarEditProfile extends StatelessWidget
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Bounce(
             onTap: () {
-            //  Get.to(() => const ProfileMainScreen());
+              //  Get.to(() => const ProfileMainScreen());
             },
             child: CommonImageView(
               imagePath: Assets.imagesSettingsIcon,
@@ -790,13 +844,12 @@ class CustomAppBarEditProfile extends StatelessWidget
           backgroundColor: kbackground,
           automaticallyImplyLeading: false,
           titleSpacing: -10,
-          leading:
-              isRTL
-                  ? Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: _buildOptionalIcons(),
-                  )
-                  : (showLeading ? _buildBackButton() : null),
+          leading: isRTL
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: _buildOptionalIcons(),
+                )
+              : (showLeading ? _buildBackButton() : null),
           leadingWidth: isRTL ? (_buildOptionalIcons().length * 50.0) : null,
           title: Align(
             alignment: isRTL ? Alignment.centerRight : Alignment.centerLeft,
@@ -864,8 +917,9 @@ class SimpleCustomAppBar extends StatelessWidget
 
     return InkWell(
       onTap: onBackTap ?? () => Get.back(),
-      child:
-          isRTL ? Transform.flip(flipX: true, child: backIconRight) : backIcon,
+      child: isRTL
+          ? Transform.flip(flipX: true, child: backIconRight)
+          : backIcon,
     );
   }
 
@@ -950,8 +1004,9 @@ class CustomAppBar5 extends StatelessWidget implements PreferredSizeWidget {
 
     return InkWell(
       onTap: onBackTap ?? () => Get.back(),
-      child:
-          isRTL ? Transform.flip(flipX: true, child: backIconRight) : backIcon,
+      child: isRTL
+          ? Transform.flip(flipX: true, child: backIconRight)
+          : backIcon,
     );
   }
 
@@ -963,8 +1018,7 @@ class CustomAppBar5 extends StatelessWidget implements PreferredSizeWidget {
         Padding(
           padding: const EdgeInsets.only(left: 4, right: 4),
           child: Bounce(
-           // onTap: () => Get.to(() => ChatMainScreen()),
-
+            // onTap: () => Get.to(() => ChatMainScreen()),
             child: CommonImageView(
               imagePath: Assets.imagesSendBlue,
               height: 36,
@@ -977,7 +1031,7 @@ class CustomAppBar5 extends StatelessWidget implements PreferredSizeWidget {
       optionalActions.add(
         Bounce(
           onTap: () {
-             // Get.to(() => const ProfileMainScreen());
+            // Get.to(() => const ProfileMainScreen());
           },
           child: CommonImageView(
             imagePath: Assets.imagesSettingsIcon,
@@ -997,7 +1051,7 @@ class CustomAppBar5 extends StatelessWidget implements PreferredSizeWidget {
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Bounce(
             onTap: () {
-             // Get.to(() => const ProfileMainScreen());
+              // Get.to(() => const ProfileMainScreen());
             },
             child: CommonImageView(
               imagePath: Assets.imagesSettingsIcon,
@@ -1010,12 +1064,8 @@ class CustomAppBar5 extends StatelessWidget implements PreferredSizeWidget {
     if (ShowChat) {
       optionalActions.add(
         Bounce(
-         // onTap: () => Get.to(() => ChatMainScreen()),
-        
-          child: CommonImageView(
-            imagePath: Assets.imagesSendBlue,
-            height: 36,
-          ),
+          // onTap: () => Get.to(() => ChatMainScreen()),
+          child: CommonImageView(imagePath: Assets.imagesSendBlue, height: 36),
         ),
       );
     }
@@ -1037,13 +1087,12 @@ class CustomAppBar5 extends StatelessWidget implements PreferredSizeWidget {
           backgroundColor: kbackground,
           automaticallyImplyLeading: false,
           titleSpacing: -10,
-          leading:
-              isRTL
-                  ? Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: _buildOptionalIcons(),
-                  )
-                  : (showLeading ? _buildBackButton() : null),
+          leading: isRTL
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: _buildOptionalIcons(),
+                )
+              : (showLeading ? _buildBackButton() : null),
           leadingWidth: isRTL ? (_buildOptionalIcons().length * 50.0) : null,
           title: Align(
             alignment: isRTL ? Alignment.centerRight : Alignment.centerLeft,
@@ -1112,8 +1161,9 @@ class CustomAppBar6 extends StatelessWidget implements PreferredSizeWidget {
 
     return InkWell(
       onTap: onBackTap ?? () => Get.back(),
-      child:
-          isRTL ? Transform.flip(flipX: true, child: backIconRight) : backIcon,
+      child: isRTL
+          ? Transform.flip(flipX: true, child: backIconRight)
+          : backIcon,
     );
   }
 
@@ -1126,7 +1176,7 @@ class CustomAppBar6 extends StatelessWidget implements PreferredSizeWidget {
           padding: const EdgeInsets.only(left: 4, right: 4),
           child: Bounce(
             onTap: () {
-             // DialogHelper.DeleteCartItemDialog(context);
+              // DialogHelper.DeleteCartItemDialog(context);
             },
             child: CommonImageView(imagePath: Assets.imagesTrash, height: 28),
           ),
@@ -1171,15 +1221,15 @@ class CustomAppBar6 extends StatelessWidget implements PreferredSizeWidget {
           backgroundColor: kbackground,
           automaticallyImplyLeading: false,
           titleSpacing: -10,
-          leading:
-              isRTL
-                  ? Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: _buildOptionalIcons(context),
-                  )
-                  : (showLeading ? _buildBackButton() : null),
-          leadingWidth:
-              isRTL ? (_buildOptionalIcons(context).length * 50.0) : null,
+          leading: isRTL
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: _buildOptionalIcons(context),
+                )
+              : (showLeading ? _buildBackButton() : null),
+          leadingWidth: isRTL
+              ? (_buildOptionalIcons(context).length * 50.0)
+              : null,
           title: Align(
             alignment: isRTL ? Alignment.centerRight : Alignment.centerLeft,
             child: MyText(
@@ -1245,8 +1295,9 @@ class SimpleCustomAppBar2 extends StatelessWidget
 
     return InkWell(
       onTap: onBackTap ?? () => Get.back(),
-      child:
-          isRTL ? Transform.flip(flipX: true, child: backIconRight) : backIcon,
+      child: isRTL
+          ? Transform.flip(flipX: true, child: backIconRight)
+          : backIcon,
     );
   }
 
@@ -1264,32 +1315,31 @@ class SimpleCustomAppBar2 extends StatelessWidget
           leading: showLeading && !isRTL ? _buildBackButton() : null,
           title: Align(
             alignment: isRTL ? Alignment.centerRight : Alignment.centerLeft,
-            child:
-                isRTL
-                    ? MyText(
-                      text: title ?? "",
-                      size: textSize,
-                      color: kBlack,
-                      weight: FontWeight.w700,
-                      textAlign: textAlign ?? TextAlign.right,
-                    )
-                    : Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        MyText(
-                          text: title ?? "",
-                          size: textSize,
-                          color: kBlack,
-                          weight: FontWeight.w700,
-                          textAlign: textAlign ?? TextAlign.left,
-                        ),
-                        const SizedBox(width: 8),
-                        CommonImageView(
-                          imagePath: Assets.imagesChatUserBadge,
-                          height: 24,
-                        ),
-                      ],
-                    ),
+            child: isRTL
+                ? MyText(
+                    text: title ?? "",
+                    size: textSize,
+                    color: kBlack,
+                    weight: FontWeight.w700,
+                    textAlign: textAlign ?? TextAlign.right,
+                  )
+                : Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      MyText(
+                        text: title ?? "",
+                        size: textSize,
+                        color: kBlack,
+                        weight: FontWeight.w700,
+                        textAlign: textAlign ?? TextAlign.left,
+                      ),
+                      const SizedBox(width: 8),
+                      CommonImageView(
+                        imagePath: Assets.imagesChatUserBadge,
+                        height: 24,
+                      ),
+                    ],
+                  ),
           ),
           actions: [
             if (isRTL)
@@ -1354,8 +1404,9 @@ class SimpleCustomAppBar3 extends StatelessWidget
 
     return InkWell(
       onTap: onBackTap ?? () => Get.back(),
-      child:
-          isRTL ? Transform.flip(flipX: true, child: backIconRight) : backIcon,
+      child: isRTL
+          ? Transform.flip(flipX: true, child: backIconRight)
+          : backIcon,
     );
   }
 
@@ -1368,7 +1419,7 @@ class SimpleCustomAppBar3 extends StatelessWidget
           padding: const EdgeInsets.only(left: 4, right: 4),
           child: Bounce(
             onTap: () {
-             // DialogHelper.BlockDialog(context);
+              // DialogHelper.BlockDialog(context);
             },
             child: CommonImageView(imagePath: Assets.imagesCall, height: 28),
           ),
@@ -1387,7 +1438,7 @@ class SimpleCustomAppBar3 extends StatelessWidget
               return [
                 PopupMenuItem(
                   onTap: () {
-                 //   DialogHelper.BlockDialog(context);
+                    //   DialogHelper.BlockDialog(context);
                   },
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -1457,7 +1508,7 @@ class SimpleCustomAppBar3 extends StatelessWidget
               return [
                 PopupMenuItem(
                   onTap: () {
-                   /// DialogHelper.BlockDialog(context);
+                    /// DialogHelper.BlockDialog(context);
                   },
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -1474,7 +1525,7 @@ class SimpleCustomAppBar3 extends StatelessWidget
                 ),
                 PopupMenuItem(
                   onTap: () {
-                 //   ReportBottomSheet(context);
+                    //   ReportBottomSheet(context);
                   },
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -1519,15 +1570,15 @@ class SimpleCustomAppBar3 extends StatelessWidget
           backgroundColor: kbackground,
           automaticallyImplyLeading: false,
           titleSpacing: -10,
-          leading:
-              isRTL
-                  ? Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: _buildOptionalIcons(context),
-                  )
-                  : (showLeading ? _buildBackButton() : null),
-          leadingWidth:
-              isRTL ? (_buildOptionalIcons(context).length * 50.0) : null,
+          leading: isRTL
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: _buildOptionalIcons(context),
+                )
+              : (showLeading ? _buildBackButton() : null),
+          leadingWidth: isRTL
+              ? (_buildOptionalIcons(context).length * 50.0)
+              : null,
           title: Align(
             alignment: isRTL ? Alignment.centerRight : Alignment.centerLeft,
             child: MyText(
@@ -2011,8 +2062,9 @@ class CustomAppBarText extends StatelessWidget implements PreferredSizeWidget {
 
     return InkWell(
       onTap: onBackTap ?? () => Get.back(),
-      child:
-          isRTL ? Transform.flip(flipX: true, child: backIconRight) : backIcon,
+      child: isRTL
+          ? Transform.flip(flipX: true, child: backIconRight)
+          : backIcon,
     );
   }
 
@@ -2076,13 +2128,12 @@ class CustomAppBarText extends StatelessWidget implements PreferredSizeWidget {
           backgroundColor: kbackground,
           automaticallyImplyLeading: false,
           titleSpacing: -10,
-          leading:
-              isRTL
-                  ? Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: _buildOptionalIcons(),
-                  )
-                  : (showLeading ? _buildBackButton() : null),
+          leading: isRTL
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: _buildOptionalIcons(),
+                )
+              : (showLeading ? _buildBackButton() : null),
           leadingWidth: isRTL ? 120 : null,
           title: Align(
             alignment: isRTL ? Alignment.centerRight : Alignment.centerLeft,
@@ -2155,8 +2206,9 @@ class CustomAppBar8 extends StatelessWidget implements PreferredSizeWidget {
 
     return InkWell(
       onTap: onBackTap ?? () => Get.back(),
-      child:
-          isRTL ? Transform.flip(flipX: true, child: backIconRight) : backIcon,
+      child: isRTL
+          ? Transform.flip(flipX: true, child: backIconRight)
+          : backIcon,
     );
   }
 
@@ -2190,7 +2242,7 @@ class CustomAppBar8 extends StatelessWidget implements PreferredSizeWidget {
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Bounce(
             onTap: () {
-             // Get.to(() => const ChatMainScreen());
+              // Get.to(() => const ChatMainScreen());
             },
             child: CommonImageView(
               imagePath: Assets.imagesSendBlue,
@@ -2216,14 +2268,13 @@ class CustomAppBar8 extends StatelessWidget implements PreferredSizeWidget {
           centerTitle: centerTitle,
           backgroundColor: kWhite,
           automaticallyImplyLeading: false,
-          leading:
-              isRTL
-                  ? Row(
-                    spacing: 4,
-                    mainAxisSize: MainAxisSize.min,
-                    children: _buildOptionalIcons(),
-                  )
-                  : (showLeading ? _buildBackButton() : null),
+          leading: isRTL
+              ? Row(
+                  spacing: 4,
+                  mainAxisSize: MainAxisSize.min,
+                  children: _buildOptionalIcons(),
+                )
+              : (showLeading ? _buildBackButton() : null),
           leadingWidth: isRTL ? (_buildOptionalIcons().length * 50.0) : null,
           title: Align(
             alignment: isRTL ? Alignment.centerRight : Alignment.centerLeft,

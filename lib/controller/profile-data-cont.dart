@@ -82,7 +82,7 @@ class FillUpProfileController extends GetxController {
     update();
 
     try {
-      await Future.delayed(const Duration(seconds: 2)); // simulate network
+      await Future.delayed(const Duration(seconds: 2));
       final randomSuccess = Random().nextBool();
 
       if (randomSuccess) {

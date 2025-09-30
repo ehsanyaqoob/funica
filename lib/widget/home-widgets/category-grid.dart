@@ -34,7 +34,7 @@ class _CategoryGridState extends State<CategoryGrid> {
                 width: 64,
                 decoration: BoxDecoration(
                   color: kDynamicCard(context),
-                  borderRadius: BorderRadius.circular(24.0),
+                  borderRadius: BorderRadius.circular(30.0),
                   border: Border.all(color: kDynamicBorder(context), width: 1),
                 ),
                 child: Center(

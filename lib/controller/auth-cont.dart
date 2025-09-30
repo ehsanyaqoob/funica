@@ -1,10 +1,7 @@
-import 'package:funica/views/auth/sign-in.dart';
-import 'package:funica/views/home/home-screen.dart';
-import 'package:funica/views/profile/finger-print-screen.dart';
-import 'package:funica/views/profile/create-pin.dart';
-import 'package:funica/views/profile/fill-up-profile-details.dart';
+import 'package:funica/Screens/home/home-screen.dart';
+import 'package:funica/Screens/profile/finger-print-screen.dart';
+import 'package:funica/Screens/profile/fill-up-profile-details.dart';
 import 'package:funica/widget/toasts.dart';
-import 'package:get/get.dart';
 import 'package:funica/constants/export.dart';
 
 class AuthController extends GetxController {
@@ -19,7 +16,8 @@ class AuthController extends GetxController {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController newPasswordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
 
   var pin = "".obs;
   var selectedContact = ''.obs;
@@ -37,7 +35,6 @@ class AuthController extends GetxController {
     super.onClose();
   }
 
-  // ==================== LOGIN ====================
   Future<void> login(String email, String password, bool remember) async {
     try {
       isLoading(true);
@@ -56,9 +53,11 @@ class AuthController extends GetxController {
 
       if (remember) debugPrint("User chose to remember credentials");
 
-      Get.offAll(() => HomeScreen(),
-          transition: Transition.cupertino,
-          duration: const Duration(milliseconds: 500));
+      Get.offAll(
+        () => HomeScreen(),
+        transition: Transition.cupertino,
+        duration: const Duration(milliseconds: 500),
+      );
     } catch (e) {
       AppToast.error('Login failed: ${e.toString()}'.tr);
     } finally {
@@ -66,7 +65,6 @@ class AuthController extends GetxController {
     }
   }
 
-  // ==================== SIGNUP ====================
   Future<void> signup(String name, String email, String password) async {
     try {
       isLoading(true);
@@ -91,9 +89,11 @@ class AuthController extends GetxController {
 
       AppToast.success('Signup successful! Welcome to Funica'.tr);
 
-      Get.to(() => const FillUpProfileDetailScreen(),
-          transition: Transition.cupertino,
-          duration: const Duration(milliseconds: 500));
+      Get.to(
+        () => const FillUpProfileDetailScreen(),
+        transition: Transition.cupertino,
+        duration: const Duration(milliseconds: 500),
+      );
     } catch (e) {
       AppToast.error('Signup failed: ${e.toString()}'.tr);
     } finally {
@@ -101,7 +101,6 @@ class AuthController extends GetxController {
     }
   }
 
-  // ==================== PIN CREATION ====================
   Future<void> createPin() async {
     if (pin.value.length != 4) {
       AppToast.error("Please enter 4-digit PIN");
@@ -114,9 +113,11 @@ class AuthController extends GetxController {
       AppToast.success("Your pin has been successfully created");
       hasPinSetup(true);
 
-      Get.to(() => const FingerPrintScreen(),
-          transition: Transition.cupertino,
-          duration: const Duration(milliseconds: 500));
+      Get.to(
+        () => const FingerPrintScreen(),
+        transition: Transition.cupertino,
+        duration: const Duration(milliseconds: 500),
+      );
     } catch (e) {
       AppToast.error("Failed to create PIN: ${e.toString()}");
     } finally {
@@ -124,7 +125,6 @@ class AuthController extends GetxController {
     }
   }
 
-  // ==================== FORGOT PASSWORD ====================
   void selectForgotPasswordContact(String contact, String masked) {
     selectedContact(contact);
     maskedContact(masked);
@@ -197,7 +197,6 @@ class AuthController extends GetxController {
     maskedContact('');
   }
 
-  // ==================== TOGGLES ====================
   void togglePasswordVisibility() => obscurePassword(!obscurePassword.value);
   void toggleRememberMe(bool? value) => rememberMe(value ?? false);
   void toggleAgreeToTerms(bool? value) => agreeToTerms(value ?? false);
