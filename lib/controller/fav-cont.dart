@@ -2,10 +2,11 @@ import 'dart:convert';
 import 'package:funica/app-state/app-state.dart';
 import 'package:funica/constants/export.dart';
 import 'package:funica/models/product-model.dart';
+import 'package:get_storage/get_storage.dart';
 
 class FavouritesController extends BaseController {
   final RxList<ProductModel> _favourites = <ProductModel>[].obs;
-  final SharedPreferences _prefs = Get.find<SharedPreferences>();
+  final GetStorage _storage = GetStorage();
 
   static const String _favouritesKey = 'favourites_data';
 
@@ -19,7 +20,7 @@ class FavouritesController extends BaseController {
 
   Future<void> _loadFavourites() async {
     await runAsyncOperation(() async {
-      final favouritesData = _prefs.getString(_favouritesKey);
+      final favouritesData = _storage.read(_favouritesKey);
       if (favouritesData != null && favouritesData.isNotEmpty) {
         final List<dynamic> decoded = json.decode(favouritesData);
         _favourites.assignAll(
@@ -34,7 +35,7 @@ class FavouritesController extends BaseController {
       final favouritesJson = json.encode(
         _favourites.map((e) => e.toJson()).toList(),
       );
-      await _prefs.setString(_favouritesKey, favouritesJson);
+      await _storage.write(_favouritesKey, favouritesJson);
       debugPrint('✅ Favourites persisted successfully');
     } catch (e) {
       debugPrint('❌ Error persisting favourites: $e');
@@ -47,7 +48,6 @@ class FavouritesController extends BaseController {
     } else {
       _favourites.removeWhere((item) => item.title == product.title);
     }
-    // Auto-save when favourites change
     persistFavourites();
   }
 
@@ -55,28 +55,9 @@ class FavouritesController extends BaseController {
     return _favourites.any((item) => item.title == product.title);
   }
 
-  // App lifecycle methods
-  void onAppResumed() {
-    debugPrint('🔄 FavouritesController: App resumed');
-    // Refresh data if needed
-    _loadFavourites();
-  }
-
-  void onAppInactive() {
-    debugPrint('⏸️ FavouritesController: App inactive');
-    // Quick save
-    persistFavourites();
-  }
-
-  void onAppPaused() {
-    debugPrint('🚫 FavouritesController: App paused');
-    // Ensure data is persisted
-    persistFavourites();
-  }
-
-  void onAppDetached() {
-    debugPrint('💀 FavouritesController: App detached');
-    // Final persistence
-    persistFavourites();
-  }
+  // Lifecycle handlers
+  void onAppResumed() => _loadFavourites();
+  void onAppInactive() => persistFavourites();
+  void onAppPaused() => persistFavourites();
+  void onAppDetached() => persistFavourites();
 }

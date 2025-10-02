@@ -1,4 +1,5 @@
 import 'package:funica/controller/fav-cont.dart';
+import 'package:funica/controller/prodcut-cont.dart';
 import 'package:funica/widget/home-widgets/reviews-screen.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:funica/constants/export.dart';
@@ -22,11 +23,9 @@ class ProductDetailsView extends StatefulWidget {
 
 class _ProductDetailsViewState extends State<ProductDetailsView> {
   final PageController _pageController = PageController();
-  final FavouritesController favouritesController =
-      Get.find<FavouritesController>();
+  final FavouritesController favouritesController = Get.find<FavouritesController>();
+  final ProductController productController = Get.put(ProductController());
   late bool _isLiked;
-  int quantity = 1;
-  int? selectedColorIndex;
   bool isExpanded = false;
 
   final List<Color> _colors = [
@@ -42,6 +41,7 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
   void initState() {
     super.initState();
     _isLiked = widget.initialIsLiked;
+    productController.resetSelection();
   }
 
   void _handleLikeTap() {
@@ -60,6 +60,10 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
     );
   }
 
+  void _handleAddToCart() {
+    productController.addToCart(widget.product);
+  }
+
   @override
   Widget build(BuildContext context) {
     return GetBuilder<ThemeController>(
@@ -68,13 +72,9 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
         return AnnotatedRegion<SystemUiOverlayStyle>(
           value: SystemUiOverlayStyle(
             statusBarColor: Colors.transparent,
-            statusBarIconBrightness: isDarkMode
-                ? Brightness.light
-                : Brightness.dark,
+            statusBarIconBrightness: isDarkMode ? Brightness.light : Brightness.dark,
             systemNavigationBarColor: kDynamicScaffoldBackground(context),
-            systemNavigationBarIconBrightness: isDarkMode
-                ? Brightness.light
-                : Brightness.dark,
+            systemNavigationBarIconBrightness: isDarkMode ? Brightness.light : Brightness.dark,
           ),
           child: Scaffold(
             backgroundColor: kDynamicScaffoldBackground(context),
@@ -104,9 +104,7 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                         backgroundColor: Colors.black54,
                         child: IconButton(
                           icon: SvgPicture.asset(
-                            _isLiked
-                                ? Assets.heartfilled
-                                : Assets.heartunfilled,
+                            _isLiked ? Assets.heartfilled : Assets.heartunfilled,
                             height: 30,
                             color: _isLiked ? Colors.red : Colors.white,
                           ),
@@ -233,7 +231,7 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                             text: widget.product.description,
                             size: 16,
                             color: kDynamicListTileSubtitle(context),
-                            maxLines: 2, // Changed from 5 to 2
+                            maxLines: 2,
                             textOverflow: TextOverflow.ellipsis,
                           ),
                           secondChild: MyText(
@@ -241,9 +239,7 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                             size: 16,
                             color: kDynamicListTileSubtitle(context),
                           ),
-                          crossFadeState: isExpanded
-                              ? CrossFadeState.showSecond
-                              : CrossFadeState.showFirst,
+                          crossFadeState: isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
                         ),
                         const Gap(6),
                         Bounce(
@@ -267,8 +263,10 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                           children: [
                             for (int i = 0; i < _colors.length; i++)
                               GestureDetector(
-                                onTap: () =>
-                                    setState(() => selectedColorIndex = i),
+                                onTap: () {
+                                  setState(() {});
+                                  productController.setSelectedColor(i);
+                                },
                                 child: Container(
                                   margin: const EdgeInsets.only(right: 12),
                                   padding: const EdgeInsets.all(8),
@@ -276,13 +274,13 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                                     color: _colors[i],
                                     borderRadius: BorderRadius.circular(8),
                                     border: Border.all(
-                                      color: selectedColorIndex == i
+                                      color: productController.selectedColorIndex.value == i
                                           ? kDynamicBorder(context)
                                           : Colors.transparent,
                                       width: 2.5,
                                     ),
                                   ),
-                                  child: selectedColorIndex == i
+                                  child: productController.selectedColorIndex.value == i
                                       ? SvgPicture.asset(
                                           Assets.check,
                                           height: 22,
@@ -315,31 +313,25 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   IconButton(
-                                    onPressed: () {
-                                      if (quantity > 1) {
-                                        setState(() => quantity--);
-                                      }
-                                    },
+                                    onPressed: productController.decreaseQuantity,
                                     icon: SvgPicture.asset(
                                       Assets.minus,
                                       color: kDynamicIcon(context),
                                       height: 26,
                                     ),
                                   ),
-                                  Container(
+                                  Obx(() => Container(
                                     width: 60,
                                     alignment: Alignment.center,
                                     child: MyText(
-                                      text: quantity.toString(),
+                                      text: productController.quantity.value.toString(),
                                       size: 18,
                                       weight: FontWeight.bold,
                                       color: kDynamicText(context),
                                     ),
-                                  ),
+                                  )),
                                   IconButton(
-                                    onPressed: () {
-                                      setState(() => quantity++);
-                                    },
+                                    onPressed: productController.increaseQuantity,
                                     icon: SvgPicture.asset(
                                       Assets.add,
                                       color: kDynamicIcon(context),
@@ -351,7 +343,6 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                             ),
                           ],
                         ),
-
                         const Gap(16.0),
                         Divider(
                           thickness: 1.5,
@@ -392,21 +383,20 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                         color: kDynamicListTileSubtitle(context),
                       ),
                       const Gap(2),
-                      MyText(
-                        text: _getPriceWithoutDollarSign(),
+                      Obx(() => MyText(
+                        text: _calculateTotalPrice(),
                         size: 24,
                         weight: FontWeight.bold,
                         color: kDynamicText(context),
-                      ),
+                      )),
                     ],
                   ),
                   const Spacer(),
                   Expanded(
                     child: MyButtonWithIcon(
                       iconPath: Assets.cartfilled,
-
                       text: "Add to Cart",
-                      onTap: () {},
+                      onTap: _handleAddToCart,
                     ),
                   ),
                 ],
@@ -418,8 +408,13 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
     );
   }
 
+  String _calculateTotalPrice() {
+    final price = double.tryParse(widget.product.price.replaceAll('\$', '')) ?? 0;
+    final total = price * productController.quantity.value;
+    return '\$${total.toStringAsFixed(2)}';
+  }
+
   String _getPriceWithoutDollarSign() {
-    // Remove extra dollar signs if present
     String price = widget.product.price;
     if (price.startsWith('\$')) {
       return price;

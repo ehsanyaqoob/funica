@@ -183,6 +183,29 @@ class Assets {
   static const String check = "assets/images/check.svg";
   static const String cartfilled = "assets/images/cart-filled.svg";
   static const String delete = "assets/images/delete.svg";
+  static const String checkout = "assets/images/checkout.svg";
+  static const String loaction = "assets/images/location-filled.svg";
+  // navbar assets
+  static const String homefilled = "assets/images/home-filled.svg";
+  static const String homeunfilled = "assets/images/home-unfilled.svg";
+  static const String cartunfilled = "assets/images/cart-unfilled.svg";
+  static const String orderfilled = "assets/images/order-filled.svg";
+  static const String orderunfilled = "assets/images/order-unfilled.svg";
+  static const String walletfilled = "assets/images/wallet-filled.svg";
+  static const String walletunfilled = "assets/images/wallet-unfilled.svg";
+  static const String profilefilled = "assets/images/profile-filled.svg";
+  static const String profileunfilled = "assets/images/profile-unfilled.svg";
+  static const String money = "assets/images/money.svg";
+  static const String planefilled = "assets/images/plane-filled.svg";
+  static const String rocket = "assets/images/rocket-filled.svg";
+  static const String truck = "assets/images/truck-filled.svg";
+
+  static const String discount = "assets/images/discount.svg";
+  static const String paypal = "assets/images/paypal.svg";
+  static const String amazon = "assets/images/amazon.svg";
+
+
+
 
   static const String imagesFignerprintScan =
       "assets/images/fignerprint_scan.png";
@@ -738,7 +761,4 @@ class Assets {
   /// Assets for imagesVerify
   /// assets/images/verify.png
   static const String imagesVerify = "assets/images/verify.png";
-
- 
-
 }

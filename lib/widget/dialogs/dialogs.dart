@@ -1,53 +1,43 @@
 import 'package:funica/constants/export.dart';
-import 'package:funica/Screens/auth/sign-in.dart';
+import 'package:funica/controller/prodcut-cont.dart';
 import 'package:funica/widget/bottomsheets/bottomsheet.dart';
 
 class DialogHelper {
- static void showPasswordResetSuccessDialog() {
+  static void showDeleteDialog(CartItem cartItem, ProductController productController) {
     Get.dialog(
-      Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: kWhite,
-              borderRadius: BorderRadius.all(Radius.circular(12)),
+      AlertDialog(
+        backgroundColor: kDynamicCard(Get.context!),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: MyText(
+          text: "Remove Item",
+          size: 18,
+          weight: FontWeight.w600,
+          color: kDynamicText(Get.context!),
+        ),
+        content: MyText(
+          text: "Are you sure you want to remove ${cartItem.product.title} from your cart?",
+          size: 14,
+          color: kDynamicListTileSubtitle(Get.context!),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: MyText(
+              text: "Cancel",
+              size: 14,
+              color: kDynamicListTileSubtitle(Get.context!),
             ),
-            child: Column(
-              children: [
-                CircleAvatar(
-                  radius: 46,
-                  backgroundColor: Colors.green.shade100,
-                  child: const Icon(Icons.check, size: 40, color: Colors.green),
-                ),
-                const Gap(20),
-                MyText(
-                  text: "Password Reset Successful!".tr,
-                  size: 20,
-                  color: kBlack,
-                  weight: FontWeight.w700,
-                  textAlign: TextAlign.center,
-                ),
-                const Gap(10),
-                MyText(
-                  text: "Your password has been changed successfully. You can now login with your new password.".tr,
-                  size: 14,
-                  color: kSubText,
-                  paddingBottom: 16,
-                  weight: FontWeight.w400,
-                  textAlign: TextAlign.center,
-                ),
-                MyButton(
-                  buttonText: "Continue to Login".tr,
-                  onTap: () {
-                    Get.back();
-                    Get.off(() => SignInScreen());
-                  },
-                ),
-              ],
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back();
+              productController.removeFromCart(cartItem);
+            },
+            child: MyText(
+              text: "Remove",
+              size: 14,
+              color: Colors.red,
+              weight: FontWeight.w600,
             ),
           ),
         ],
@@ -55,66 +45,143 @@ class DialogHelper {
     );
   }
 
-  static void showSuccessDialog() {
-  Get.dialog(
-    Center(
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 20),
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: kWhite,
-          borderRadius: BorderRadius.circular(20),
+  static void showClearCartDialog(ProductController productController) {
+    Get.dialog(
+      AlertDialog(
+        backgroundColor: kDynamicCard(Get.context!),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: MyText(
+          text: "Clear Cart",
+          size: 18,
+          weight: FontWeight.w600,
+          color: kDynamicText(Get.context!),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Avatar / Icon
-            CircleAvatar(
-              radius: 40,
-              backgroundColor: Colors.grey.shade200,
-              child: const Icon(Icons.person, size: 40, color: Colors.black),
-            ),
-            const SizedBox(height: 20),
-
-            MyText(
-              text: "Congratulations!".tr,
-              size: 20,
-              weight: FontWeight.w700,
-              color: kBlack,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 10),
-
-            MyText(
-              text: "Your account is ready to use.".tr,
+        content: MyText(
+          text: "Are you sure you want to remove all items from your cart?",
+          size: 14,
+          color: kDynamicListTileSubtitle(Get.context!),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: MyText(
+              text: "Cancel",
               size: 14,
-              color: kSubText,
-              textAlign: TextAlign.center,
+              color: kDynamicListTileSubtitle(Get.context!),
             ),
-
-            const SizedBox(height: 20),
-
-            // ✅ Next Button
-            MyButton(
-              buttonText: "Next".tr,
-              onTap: () {
-                Get.back(); // close dialog
-                // Get.offAll(
-                //   () => InitialScreen(),
-                //   transition: Transition.circularReveal,
-                //   duration: const Duration(milliseconds: 600),
-                // );
-              },
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back();
+              productController.clearCart();
+            },
+            child: MyText(
+              text: "Clear All",
+              size: 14,
+              color: Colors.red,
+              weight: FontWeight.w600,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    ),
-    barrierDismissible: false,
-  );
-}
+    );
+  }
 
-  
+  static void showCheckoutDialog() {
+    Get.dialog(
+      AlertDialog(
+        backgroundColor: kDynamicCard(Get.context!),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: MyText(
+          text: "Checkout",
+          size: 18,
+          weight: FontWeight.w600,
+          color: kDynamicText(Get.context!),
+        ),
+        content: MyText(
+          text: "Checkout functionality will be implemented soon!",
+          size: 14,
+          color: kDynamicListTileSubtitle(Get.context!),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: MyText(
+              text: "OK",
+              size: 14,
+              color: kDynamicPrimary(Get.context!),
+              weight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Additional common dialogs you might need
+  static void showSuccessDialog(String message) {
+    Get.dialog(
+      AlertDialog(
+        backgroundColor: kDynamicCard(Get.context!),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: MyText(
+          text: "Success",
+          size: 18,
+          weight: FontWeight.w600,
+          color: kDynamicText(Get.context!),
+        ),
+        content: MyText(
+          text: message,
+          size: 14,
+          color: kDynamicListTileSubtitle(Get.context!),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: MyText(
+              text: "OK",
+              size: 14,
+              color: kDynamicPrimary(Get.context!),
+              weight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static void showErrorDialog(String message) {
+    Get.dialog(
+      AlertDialog(
+        backgroundColor: kDynamicCard(Get.context!),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: MyText(
+          text: "Error",
+          size: 18,
+          weight: FontWeight.w600,
+          color: Colors.red,
+        ),
+        content: MyText(
+          text: message,
+          size: 14,
+          color: kDynamicListTileSubtitle(Get.context!),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: MyText(
+              text: "OK",
+              size: 14,
+              color: kDynamicPrimary(Get.context!),
+              weight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+
   
   static void AllowlocationDialog(BuildContext context) {
     Get.dialog(

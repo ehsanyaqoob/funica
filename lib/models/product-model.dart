@@ -1,4 +1,5 @@
 class ProductModel {
+  final String id;
   final String title;
   final String image;
   final String price;
@@ -9,6 +10,7 @@ class ProductModel {
   final String description;
 
   ProductModel({
+    required this.id,
     required this.title,
     required this.image,
     required this.price,
@@ -22,6 +24,7 @@ class ProductModel {
   // Convert ProductModel to Map for JSON serialization
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'title': title,
       'image': image,
       'price': price,
@@ -36,6 +39,7 @@ class ProductModel {
   // Create ProductModel from Map (JSON)
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     return ProductModel(
+      id: json['id'] ?? '',
       title: json['title'] ?? '',
       image: json['image'] ?? '',
       price: json['price'] ?? '',
@@ -49,6 +53,7 @@ class ProductModel {
 
   // Optional: Create a copyWith method for immutability
   ProductModel copyWith({
+    String? id,
     String? title,
     String? image,
     String? price,
@@ -59,6 +64,7 @@ class ProductModel {
     String? description,
   }) {
     return ProductModel(
+      id: id ?? this.id,
       title: title ?? this.title,
       image: image ?? this.image,
       price: price ?? this.price,

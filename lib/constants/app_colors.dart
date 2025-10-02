@@ -59,6 +59,23 @@ Color kDynamicDivider(BuildContext context) =>
 
 Color kDynamicOutline(BuildContext context) =>
     kIsDarkMode(context) ? kGreyColor4 : kGreyborder;
+/// Radio Button Colors (respects light & dark mode)
+Color kDynamicRadioActive(BuildContext context) =>
+    kDynamicIcon(context);
+
+Color kDynamicRadioFill(BuildContext context) =>
+    kDynamicText(context);
+
+Color kDynamicRadioOverlay(BuildContext context) =>
+    kDynamicHighlightColor(context);
+
+Color kDynamicRadioBorder(BuildContext context, bool isSelected) =>
+     kDynamicBorder(context);
+
+Color kDynamicRadioInner(BuildContext context) =>
+   kDynamicBorder(context);
+
+
 
 Color kDynamicSeparator(BuildContext context) =>
     kIsDarkMode(context) ? kDividerDark : kDividerColor;
@@ -137,10 +154,10 @@ Color kDynamicNavigationBarBackground(BuildContext context) =>
     kIsDarkMode(context) ? kDarkBackground : kWhite;
 
 Color kDynamicNavigationBarItem(BuildContext context) =>
-    kIsDarkMode(context) ? kWhite : kBlack;
+    kIsDarkMode(context) ? kGreyColor4 : kGreyColor;
 
 Color kDynamicNavigationBarSelectedItem(BuildContext context) =>
-    kIsDarkMode(context) ? kPrimaryDark : kPrimaryColor;
+    kIsDarkMode(context) ? kWhite : kBlack;
 Color kDynamicTabBarBackground(BuildContext context) =>
     kIsDarkMode(context) ? kDarkBackground : kLightBackground;
 

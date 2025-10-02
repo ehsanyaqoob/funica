@@ -1,4 +1,5 @@
-import 'package:funica/Screens/home/home-screen.dart';
+import 'package:funica/Screens/navbar/homebarscreens/home-screen.dart';
+import 'package:funica/Screens/navbar/navbar-screen.dart';
 import 'package:funica/Screens/profile/finger-print-screen.dart';
 import 'package:funica/Screens/profile/fill-up-profile-details.dart';
 import 'package:funica/widget/toasts.dart';
@@ -54,7 +55,7 @@ class AuthController extends GetxController {
       if (remember) debugPrint("User chose to remember credentials");
 
       Get.offAll(
-        () => HomeScreen(),
+        () => FunicaNavBar(),
         transition: Transition.cupertino,
         duration: const Duration(milliseconds: 500),
       );
@@ -90,7 +91,7 @@ class AuthController extends GetxController {
       AppToast.success('Signup successful! Welcome to Funica'.tr);
 
       Get.to(
-        () => const FillUpProfileDetailScreen(),
+        () => const FunicaNavBar(),
         transition: Transition.cupertino,
         duration: const Duration(milliseconds: 500),
       );
@@ -179,7 +180,7 @@ class AuthController extends GetxController {
       isForgotPasswordLoading(true);
       await Future.delayed(const Duration(seconds: 2));
 
-      DialogHelper.showPasswordResetSuccessDialog();
+      //DialogHelper.showPasswordResetSuccessDialog();
       resetForgotPasswordFlow();
     } catch (e) {
       AppToast.error("Failed to set new password: ${e.toString()}");
