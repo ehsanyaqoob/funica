@@ -1,29 +1,35 @@
 import 'dart:ui';
 
+import 'package:funica/Screens/navbar/navbar-screen.dart';
 import 'package:funica/constants/export.dart';
 import 'package:funica/controller/fav-cont.dart';
+import 'package:funica/controller/profile-data-cont.dart';
+import 'package:funica/controller/prodcut-cont.dart';
+import 'package:get_storage/get_storage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize SharedPreferences
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
 
   // Create and initialize ThemeController
   final ThemeController themeController = ThemeController();
+  
+  // Initialize ALL controllers at app start
+  Get.put(FillUpProfileController());
+  Get.put(NavController());
+  Get.put(ProductController()); // Add this line
+  Get.put(FavouritesController(), permanent: true);
+   
+  await GetStorage.init();
   await themeController.initialize();
 
   // Put dependencies in GetX
-  Get.put<SharedPreferences>(prefs);
   Get.put<ThemeController>(themeController);
 
   // For development testing - uncomment to force a specific theme
   //await themeController.switchTheme(ThemeMode.dark);
   //await themeController.switchTheme(ThemeMode.light);
   await themeController.switchTheme(ThemeMode.system);
-
-  // Initialize FavouritesController
-  Get.put(FavouritesController(), permanent: true);
 
   // Error handling setup
   FlutterError.onError = (details) {

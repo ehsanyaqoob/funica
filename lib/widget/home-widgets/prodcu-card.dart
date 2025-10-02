@@ -67,17 +67,18 @@ late bool _isLiked;
             child: Stack(
               children: [
                 // Center Image
-                Center(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16.0),
-                    child: Image.asset(
-                      widget.product.image, // Use widget.product.image
-                      fit: BoxFit.fill,
-                      width: double.infinity,
-                      height: double.infinity,
-                    ),
-                  ),
-                ),
+               Center(
+  child: ClipRRect(
+    borderRadius: BorderRadius.circular(16.0),
+    child: CommonImageView(
+      imagePath: widget.product.image, // Use imagePath for local assets
+      fit: BoxFit.fill,
+      width: double.infinity,
+      height: double.infinity,
+      radius: 16.0, // Same as ClipRRect borderRadius
+    ),
+  ),
+),
                 // Top Right Heart Icon
                 Positioned(
                   top: 8,
