@@ -1,48 +1,49 @@
 import 'package:funica/constants/export.dart';
+import 'package:funica/models/order-model.dart';
 import 'package:funica/models/product-model.dart';
 import 'package:funica/widget/toasts.dart';
 import 'package:get_storage/get_storage.dart';
 
-class CartItem {
-  final ProductModel product;
-  final int quantity;
-  final int? selectedColorIndex;
-  final double totalPrice;
+// class CartItem {
+//   final ProductModel product;
+//   final int quantity;
+//   final int? selectedColorIndex;
+//   final double totalPrice;
 
-  CartItem({
-    required this.product,
-    required this.quantity,
-    this.selectedColorIndex,
-  }) : totalPrice = (double.tryParse(product.price.replaceAll('\$', '')) ?? 0) * quantity;
+//   CartItem({
+//     required this.product,
+//     required this.quantity,
+//     this.selectedColorIndex,
+//   }) : totalPrice = (double.tryParse(product.price.replaceAll('\$', '')) ?? 0) * quantity;
 
-  CartItem copyWith({
-    int? quantity,
-    int? selectedColorIndex,
-  }) {
-    return CartItem(
-      product: product,
-      quantity: quantity ?? this.quantity,
-      selectedColorIndex: selectedColorIndex ?? this.selectedColorIndex,
-    );
-  }
+//   CartItem copyWith({
+//     int? quantity,
+//     int? selectedColorIndex,
+//   }) {
+//     return CartItem(
+//       product: product,
+//       quantity: quantity ?? this.quantity,
+//       selectedColorIndex: selectedColorIndex ?? this.selectedColorIndex,
+//     );
+//   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'product': product.toJson(),
-      'quantity': quantity,
-      'selectedColorIndex': selectedColorIndex,
-      'totalPrice': totalPrice,
-    };
-  }
+//   Map<String, dynamic> toJson() {
+//     return {
+//       'product': product.toJson(),
+//       'quantity': quantity,
+//       'selectedColorIndex': selectedColorIndex,
+//       'totalPrice': totalPrice,
+//     };
+//   }
 
-  factory CartItem.fromJson(Map<String, dynamic> json) {
-    return CartItem(
-      product: ProductModel.fromJson(json['product']),
-      quantity: json['quantity'],
-      selectedColorIndex: json['selectedColorIndex'],
-    );
-  }
-}
+//   factory CartItem.fromJson(Map<String, dynamic> json) {
+//     return CartItem(
+//       product: ProductModel.fromJson(json['product']),
+//       quantity: json['quantity'],
+//       selectedColorIndex: json['selectedColorIndex'],
+//     );
+//   }
+// }
 
 class ProductController extends GetxController {
   var cartItems = <CartItem>[].obs;

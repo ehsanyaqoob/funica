@@ -9,40 +9,29 @@ import 'package:get_storage/get_storage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-
-  // Create and initialize ThemeController
   final ThemeController themeController = ThemeController();
-  
-  // Initialize ALL controllers at app start
   Get.put(FillUpProfileController());
   Get.put(NavController());
-  Get.put(ProductController()); // Add this line
+  Get.put(ProductController()); 
   Get.put(FavouritesController(), permanent: true);
-   
   await GetStorage.init();
   await themeController.initialize();
-
   // Put dependencies in GetX
   Get.put<ThemeController>(themeController);
-
   // For development testing - uncomment to force a specific theme
   //await themeController.switchTheme(ThemeMode.dark);
   //await themeController.switchTheme(ThemeMode.light);
   await themeController.switchTheme(ThemeMode.system);
 
-  // Error handling setup
   FlutterError.onError = (details) {
     debugPrint('🚨 Flutter Error: ${details.exception}');
     debugPrint('📝 Stack trace: ${details.stack}');
   };
-
   PlatformDispatcher.instance.onError = (error, stack) {
     debugPrint('🚨 Platform Error: $error');
     debugPrint('📝 Stack trace: $stack');
     return true;
   };
-
   runApp(MyApp());
 }
 

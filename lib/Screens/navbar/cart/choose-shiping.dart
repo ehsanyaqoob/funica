@@ -2,6 +2,7 @@
 import 'package:funica/Screens/navbar/cart/promo-screen.dart';
 import 'package:funica/constants/export.dart';
 import 'package:funica/controller/prodcut-cont.dart';
+import 'package:funica/models/order-model.dart';
 import 'package:funica/widget/custom_appbar.dart';
 
 class ShippingScreen extends StatefulWidget {
@@ -147,21 +148,15 @@ class _ShippingScreenState extends State<ShippingScreen> {
               ),
             ),
             bottomNavigationBar: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              decoration: BoxDecoration(
-                color: kDynamicScaffoldBackground(context),
-                boxShadow: [
-                  BoxShadow(
-                    color: kDynamicShadow(context),
-                    blurRadius: 12,
-                    offset: const Offset(0, -4),
-                  ),
-                ],
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(26.0),
-                  topRight: Radius.circular(26.0),
-                ),
-              ),
+               padding: const EdgeInsets.all(16),
+  decoration: BoxDecoration(
+    color: kDynamicCard(context),
+    border: Border.all(color: kDynamicBorder(context)),
+    borderRadius: const BorderRadius.only(
+      topLeft: Radius.circular(26.0),
+      topRight: Radius.circular(26.0),
+    ),
+  ),
               child: Row(
                 children: [
                   Column(

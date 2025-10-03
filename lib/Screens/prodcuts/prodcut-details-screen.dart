@@ -262,7 +262,7 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                         Row(
                           children: [
                             for (int i = 0; i < _colors.length; i++)
-                              GestureDetector(
+                              Bounce(
                                 onTap: () {
                                   setState(() {});
                                   productController.setSelectedColor(i);
@@ -284,7 +284,7 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                                       ? SvgPicture.asset(
                                           Assets.check,
                                           height: 22,
-                                          color: kDynamicIcon(context),
+                                          color: kWhite,
                                         )
                                       : const SizedBox(width: 16, height: 16),
                                 ),

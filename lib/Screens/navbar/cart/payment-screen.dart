@@ -1,8 +1,10 @@
 // screens/navbar/cart/payment_screen.dart
 import 'package:funica/Screens/navbar/cart/choose-shiping.dart';
+import 'package:funica/Screens/navbar/navbar-screen.dart';
 import 'package:funica/constants/export.dart';
-import 'package:funica/controller/prodcut-cont.dart';
+import 'package:funica/models/order-model.dart';
 import 'package:funica/models/promo-model.dart';
+import 'package:funica/widget/bottomsheets/helper-sheets.dart';
 import 'package:funica/widget/custom_appbar.dart';
 import 'package:funica/widget/toasts.dart';
 
@@ -89,52 +91,33 @@ class _PaymentScreenState extends State<PaymentScreen> {
       return;
     }
 
-    // Show processing dialog
-    Get.dialog(
-      AlertDialog(
-        backgroundColor: kDynamicCard(Get.context!),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              height: 80,
-              width: 80,
-              child: CircularProgressIndicator(
-                strokeWidth: 4,
-                color: kDynamicPrimary(Get.context!),
-              ),
-            ),
-            const Gap(16),
-            MyText(
-              text: "Processing Payment...",
-              size: 16,
-              weight: FontWeight.w600,
-              color: kDynamicText(Get.context!),
-            ),
-          ],
-        ),
-      ),
-      barrierDismissible: false,
+    // Show payment processing bottom sheet
+    BottomSheetHelper.showPaymentProcessingSheet(
+      cartItems: widget.cartItems,
+      totalAmount: widget.totalAmount,
+      selectedAddress: widget.selectedAddress,
+      selectedShipping: widget.selectedShipping,
+      appliedPromo: widget.appliedPromo,
+      discountAmount: widget.discountAmount,
+      selectedPaymentMethod: _selectedPaymentMethod,
+      onPaymentSuccess: _navigateToOrderScreen,
     );
-
-    // Simulate payment processing
-    Future.delayed(const Duration(seconds: 2), () {
-      Get.back(); // Close loading dialog
-      _showPaymentSuccess();
-    });
   }
 
-  void _showPaymentSuccess() {
+  void _navigateToOrderScreen() {
     Get.offAll(
-      () => OrderSuccessScreen(
-        orderNumber: "ORD-${DateTime.now().millisecondsSinceEpoch}",
-        totalAmount: _finalTotal,
-        items: widget.cartItems.length,
-        estimatedDelivery: _getEstimatedDelivery(),
+      Get.to(
+        FunicaNavBar(),
+        transition: Transition.cupertino,
+        duration: Duration(microseconds: 500),
       ),
-      transition: Transition.cupertino,
     );
+    Future.delayed(const Duration(milliseconds: 300), () {
+      final navController = Get.find<NavController>();
+      navController.changeIndex(3);
+
+      AppToast.success("Order placed successfully!");
+    });
   }
 
   String _getEstimatedDelivery() {
@@ -142,12 +125,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
     final deliveryDays = widget.selectedShipping.deliveryTime.contains('1-2')
         ? 2
         : widget.selectedShipping.deliveryTime.contains('3-5')
-            ? 5
-            : widget.selectedShipping.deliveryTime.contains('5-7')
-                ? 7
-                : widget.selectedShipping.deliveryTime.contains('Next')
-                    ? 1
-                    : 10;
+        ? 5
+        : widget.selectedShipping.deliveryTime.contains('5-7')
+        ? 7
+        : widget.selectedShipping.deliveryTime.contains('Next')
+        ? 1
+        : 10;
 
     final deliveryDate = now.add(Duration(days: deliveryDays));
     return "${deliveryDate.day}/${deliveryDate.month}/${deliveryDate.year}";
@@ -167,11 +150,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
         return AnnotatedRegion<SystemUiOverlayStyle>(
           value: SystemUiOverlayStyle(
             statusBarColor: Colors.transparent,
-            statusBarIconBrightness:
-                isDarkMode ? Brightness.light : Brightness.dark,
+            statusBarIconBrightness: isDarkMode
+                ? Brightness.light
+                : Brightness.dark,
             systemNavigationBarColor: kDynamicScaffoldBackground(context),
-            systemNavigationBarIconBrightness:
-                isDarkMode ? Brightness.light : Brightness.dark,
+            systemNavigationBarIconBrightness: isDarkMode
+                ? Brightness.light
+                : Brightness.dark,
           ),
           child: Scaffold(
             backgroundColor: kDynamicScaffoldBackground(context),
@@ -275,9 +260,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       decoration: BoxDecoration(
         color: kDynamicCard(context),
         borderRadius: BorderRadius.circular(30.0),
-        border: Border.all(color: kDynamicBorder(context), 
-        width: 1.2,
-        ),
+        border: Border.all(color: kDynamicBorder(context), width: 1.2),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -339,10 +322,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
               ],
             ),
           ],
-          
-           Gap(6),
-           Divider(thickness: 2.5, color: kDynamicDivider(context)),
-           Gap(6),
+
+          Gap(6),
+          Divider(thickness: 2.5, color: kDynamicDivider(context)),
+          Gap(6),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -438,7 +421,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           child: MyText(
                             text: "\$${method.balance!.toStringAsFixed(2)}",
                             size: 10,
-                color: kDynamicText(context),
+                            color: kDynamicText(context),
                             weight: FontWeight.bold,
                           ),
                         ),
@@ -561,9 +544,7 @@ class OrderSuccessScreen extends StatelessWidget {
               color: kDynamicListTileSubtitle(context),
             ),
             const Gap(20),
-            MyButton(
-              buttonText: "Continue Shopping",
-            ),
+            MyButton(buttonText: "Continue Shopping"),
           ],
         ),
       ),

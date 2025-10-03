@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:funica/Screens/navbar/cart/checkout-screen.dart';
 import 'package:funica/constants/export.dart';
 import 'package:funica/controller/prodcut-cont.dart';
+import 'package:funica/models/order-model.dart';
 import 'package:funica/widget/bottomsheets/helper-sheets.dart';
 import 'package:funica/widget/custom_appbar.dart';
 
@@ -117,16 +118,37 @@ class _CartScreenState extends State<CartScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              // Left side: Total Items
               MyText(
                 text: "Total Items",
                 size: 14,
                 color: kDynamicListTileSubtitle(context),
               ),
-              MyText(
-                text: "${_productController.totalItemsCount} items",
-                size: 14,
-                weight: FontWeight.bold,
-                color: kDynamicListTileSubtitle(context),
+
+              // Right side: Items count + delete button
+              Row(
+                children: [
+                  MyText(
+                    text: "${_productController.totalItemsCount} items",
+                    size: 14,
+                    weight: FontWeight.bold,
+                    color: kDynamicListTileSubtitle(context),
+                  ),
+                  const SizedBox(width: 10), // spacing
+                  Bounce(
+                    onTap: () {
+                      BottomSheetHelper.showClearCartSheet(
+                        productController: _productController,
+                      );
+                    },
+                    child: SvgPicture.asset(
+                      Assets.delete,
+                      height: 20,
+                      width: 20,
+                      color: kDynamicIcon(context),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -303,15 +325,17 @@ class _CartScreenState extends State<CartScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           MyText(
-                            text: "\$${(double.tryParse(cartItem.product.price.replaceAll('\$', '')) ?? 0).toStringAsFixed(2)}",
+                            text:
+                                "\$${(double.tryParse(cartItem.product.price.replaceAll('\$', '')) ?? 0).toStringAsFixed(2)}",
                             size: 18.0,
                             weight: FontWeight.bold,
                             color: kDynamicText(context),
                           ),
                           MyText(
-                            text: "Total: \$${cartItem.totalPrice.toStringAsFixed(2)}",
+                            text:
+                                "Total: \$${cartItem.totalPrice.toStringAsFixed(2)}",
                             size: 16.0,
-                            weight: FontWeight.bold, 
+                            weight: FontWeight.bold,
                             color: kDynamicText(context),
                           ),
                         ],
@@ -374,7 +398,8 @@ class _CartScreenState extends State<CartScreen> {
                     const Gap(2),
                     Obx(
                       () => MyText(
-                        text: "\$${_productController.totalCartValue.toStringAsFixed(2)}",
+                        text:
+                            "\$${_productController.totalCartValue.toStringAsFixed(2)}",
                         size: 20.0,
                         weight: FontWeight.bold,
                         color: kDynamicText(context),
