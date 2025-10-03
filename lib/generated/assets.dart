@@ -204,7 +204,7 @@ class Assets {
   static const String paypal = "assets/images/paypal.svg";
   static const String amazon = "assets/images/amazon.svg";
 
-
+  static const String close = "assets/images/close.svg";
 
 
   static const String imagesFignerprintScan =
