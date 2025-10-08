@@ -34,7 +34,7 @@ class _WalletScreenState extends State<WalletScreen> {
             backgroundColor: kDynamicScaffoldBackground(context),
             appBar: GenericAppBar(
               title: "My E-Wallet",
-             showSearch: true,
+              showSearch: true,
               onSearchChanged: (query) {
                 Get.find<WalletController>().searchTransactions(query);
               },
@@ -52,63 +52,69 @@ class _WalletScreenState extends State<WalletScreen> {
             ),
             body: SafeArea(
               child: SingleChildScrollView(
-  physics: const BouncingScrollPhysics(),
-  child: Padding(
-    padding: AppSizes.DEFAULT,
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        CustomVisaCard(
-          name: 'Andrew Ainsley',
-          cardNumber: '4629362001543629',
-          balance: 9000000.0,
-          onTopUp: () {},
-        ),
-        const Gap(20),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            MyText(
-              text: 'Transaction History',
-              size: 18,
-              weight: FontWeight.bold,
-              color: kDynamicText(context),
-            ),
-            Bounce(
-              onTap: () => Get.to(
-                const AllTransaction(),
-                transition: Transition.cupertino,
-                duration: const Duration(milliseconds: 500),
-              ),
-              child: MyText(
-                text: 'See All',
-                size: 14,
-                weight: FontWeight.w600,
-                color: kDynamicText(context),
-              ),
-            ),
-          ],
-        ),
-        const Gap(10),
-        GetBuilder<WalletController>(
-          init: WalletController(),
-          builder: (walletController) {
-            final transactions = walletController.transactions.length >= 10
-                ? walletController.transactions
-                : _getExtendedTransactions(walletController.transactions);
+                physics: const BouncingScrollPhysics(),
+                child: Padding(
+                  padding: AppSizes.DEFAULT,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CustomVisaCard(
+                        name: 'Andrew Ainsley',
+                        cardNumber: '4629362001543629',
+                        balance: 9000000.0,
+                        expiryDate: "05/28",
+                        cvv: "123",
+                        onTopUp: () {
+                          // Handle top up
+                        },
+                      ),
+                      const Gap(20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          MyText(
+                            text: 'Transaction History',
+                            size: 18,
+                            weight: FontWeight.bold,
+                            color: kDynamicText(context),
+                          ),
+                          Bounce(
+                            onTap: () => Get.to(
+                              const AllTransaction(),
+                              transition: Transition.cupertino,
+                              duration: const Duration(milliseconds: 500),
+                            ),
+                            child: MyText(
+                              text: 'See All',
+                              size: 14,
+                              weight: FontWeight.w600,
+                              color: kDynamicText(context),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Gap(10),
+                      GetBuilder<WalletController>(
+                        init: WalletController(),
+                        builder: (walletController) {
+                          final transactions =
+                              walletController.transactions.length >= 10
+                              ? walletController.transactions
+                              : _getExtendedTransactions(
+                                  walletController.transactions,
+                                );
 
-            return WalletTransactionsList(
-              transactions: transactions,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-            );
-          },
-        ),
-      ],
-    ),
-  ),
-)
-
+                          return WalletTransactionsList(
+                            transactions: transactions,
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ),
         );
