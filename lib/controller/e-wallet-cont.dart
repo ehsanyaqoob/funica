@@ -6,9 +6,12 @@ class WalletController extends GetxController {
   final RxList<TransactionModel> _transactions = <TransactionModel>[].obs;
   final RxList<TransactionModel> _filteredTransactions = <TransactionModel>[].obs;
   final RxString _searchQuery = ''.obs;
+  final RxDouble _currentBalance = 9000000.0.obs; // Initial balance
   
   List<TransactionModel> get transactions => 
       _searchQuery.value.isEmpty ? _transactions : _filteredTransactions;
+  
+  double get currentBalance => _currentBalance.value;
   
   // Filtered transactions
   List<TransactionModel> get topUpTransactions => 
@@ -21,7 +24,30 @@ class WalletController extends GetxController {
   void onInit() {
     super.onInit();
     _loadTransactions();
+    _calculateCurrentBalance();
   }
+  // Add this method to your WalletController
+void refreshWalletData() {
+  // Simulate fetching fresh data from API
+  // In a real app, you would make an API call here
+  
+  // For demo purposes, we'll just update the timestamp of recent transactions
+  final now = DateTime.now();
+  for (int i = 0; i < _transactions.length && i < 3; i++) {
+    _transactions[i] = TransactionModel(
+      title: _transactions[i].title,
+      date: now.subtract(Duration(minutes: i * 5)),
+      amount: _transactions[i].amount,
+      type: _transactions[i].type,
+      icon: _transactions[i].icon,
+    );
+  }
+  
+  // Re-sort by date
+  _transactions.sort((a, b) => b.date.compareTo(a.date));
+  
+  update();
+}
 
   void _loadTransactions() {
     _transactions.assignAll([
@@ -136,6 +162,50 @@ class WalletController extends GetxController {
     _transactions.sort((a, b) => b.date.compareTo(a.date));
   }
 
+  void _calculateCurrentBalance() {
+    double balance = 9000000.0; // Initial balance
+    for (var transaction in _transactions) {
+      if (transaction.isTopUp) {
+        balance += transaction.amount;
+      } else {
+        balance -= transaction.amount;
+      }
+    }
+    _currentBalance.value = balance;
+  }
+
+  // Add top-up transaction and update balance
+  void addTopUpTransaction(double amount) {
+    final newTransaction = TransactionModel(
+      title: 'Top Up Wallet',
+      date: DateTime.now(),
+      amount: amount,
+      type: TransactionType.topUp,
+      icon: Assets.walletfilled,
+    );
+    
+    _transactions.insert(0, newTransaction);
+    _currentBalance.value += amount;
+    
+    update();
+  }
+
+  // Add order transaction and update balance
+  void addOrderTransaction(String title, double amount, String icon) {
+    final newTransaction = TransactionModel(
+      title: title,
+      date: DateTime.now(),
+      amount: amount,
+      type: TransactionType.order,
+      icon: icon,
+    );
+    
+    _transactions.insert(0, newTransaction);
+    _currentBalance.value -= amount;
+    
+    update();
+  }
+
   // Search functionality
   void searchTransactions(String query) {
     _searchQuery.value = query;
@@ -156,30 +226,11 @@ class WalletController extends GetxController {
     update();
   }
 
-  // Add new transaction
-  void addTransaction(TransactionModel transaction) {
-    _transactions.insert(0, transaction);
-    update();
-  }
-
   // Clear search
   void clearSearch() {
     _searchQuery.value = '';
     _filteredTransactions.clear();
     update();
-  }
-
-  // Get total balance
-  double get totalBalance {
-    double balance = 0;
-    for (var transaction in _transactions) {
-      if (transaction.isTopUp) {
-        balance += transaction.amount;
-      } else {
-        balance -= transaction.amount;
-      }
-    }
-    return balance;
   }
 
   // Get recent transactions (last 5)

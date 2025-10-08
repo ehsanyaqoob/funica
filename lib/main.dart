@@ -10,9 +10,9 @@ import 'package:get_storage/get_storage.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final ThemeController themeController = ThemeController();
-  Get.put(FillUpProfileController());
+  Get.put(ProfileController());
   Get.put(NavController());
-  Get.put(ProductController()); 
+  Get.put(ProductController());
   Get.put(FavouritesController(), permanent: true);
   await GetStorage.init();
   await themeController.initialize();

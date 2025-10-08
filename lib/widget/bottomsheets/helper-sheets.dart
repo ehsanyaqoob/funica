@@ -11,6 +11,9 @@ import 'package:funica/widget/dot-loader.dart';
 import 'package:funica/widget/toasts.dart';
 
 class BottomSheetHelper {
+
+
+  
   // Payment Processing Sheet - Enhanced Version
   static void showPaymentProcessingSheet({
     required List<CartItem> cartItems,
@@ -243,8 +246,8 @@ class BottomSheetHelper {
                                 ),
                                 child: SvgPicture.asset(
                                   Assets.check,
-                                    height: 20,
-                          color: kDynamicIcon(Get.context!),
+                                  height: 20,
+                                  color: kDynamicIcon(Get.context!),
                                 ),
                               ),
                               const Gap(14),
@@ -491,13 +494,13 @@ class BottomSheetHelper {
                                   Container(
                                     padding: const EdgeInsets.all(8),
                                     decoration: BoxDecoration(
-                                      color: kDynamicPrimary(Get.context!),
+                                      color: kDynamicContainer(Get.context!),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: SvgPicture.asset(
                                       Assets.info,
                                       height: 20,
-                          color: kDynamicIcon(Get.context!),
+                                      color: kDynamicIcon(Get.context!),
                                     ),
                                   ),
                                   const Gap(12),
@@ -541,7 +544,6 @@ class BottomSheetHelper {
                               onPaymentSuccess,
                             );
                           },
-                          
                         ),
 
                         const Gap(32),

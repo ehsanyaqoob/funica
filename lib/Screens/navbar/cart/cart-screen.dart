@@ -55,7 +55,7 @@ class _CartScreenState extends State<CartScreen> {
               },
               searchHint: "Search products...",
               onSettingsTap: (){
-                 Get.to(SettingsScreen(), transition: Transition.fadeIn, duration: Duration(milliseconds: 500));
+                 Get.to(SettingsScreen(), transition: Transition.cupertino, duration: Duration(milliseconds: 500));
               },
             ),
             body: Obx(() {

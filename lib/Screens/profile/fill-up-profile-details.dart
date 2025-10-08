@@ -1,13 +1,9 @@
 import 'package:country_picker/country_picker.dart';
-import 'package:flutter/material.dart';
 import 'package:funica/constants/export.dart' hide Country;
 import 'package:funica/controller/profile-data-cont.dart';
-import 'package:funica/Screens/auth/sign-up.dart';
-import 'package:funica/Screens/profile/create-pin.dart';
 import 'package:funica/widget/custom_appbar.dart';
+import 'package:funica/widget/dot-loader.dart';
 import 'package:funica/widget/toasts.dart';
-import 'package:get/get.dart';
-import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 
 class FillUpProfileDetailScreen extends StatefulWidget {
@@ -19,25 +15,119 @@ class FillUpProfileDetailScreen extends StatefulWidget {
 }
 
 class _FillUpProfileDetailScreenState extends State<FillUpProfileDetailScreen> {
-  final FillUpProfileController _controller = Get.put(
-    FillUpProfileController(),
-  );
+  final ProfileController _controller = Get.find<ProfileController>();
+  bool _isLoading = false;
 
+  @override
+  Widget build(BuildContext context) {
+    return GetBuilder<ThemeController>(
+      builder: (themeController) {
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          value: SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: themeController.isDarkMode
+                ? Brightness.light
+                : Brightness.dark,
+            systemNavigationBarColor: kDynamicScaffoldBackground(context),
+            systemNavigationBarIconBrightness: themeController.isDarkMode
+                ? Brightness.light
+                : Brightness.dark,
+          ),
+          child: Stack(
+            children: [
+              Scaffold(
+                backgroundColor: kDynamicScaffoldBackground(context),
+                appBar: CustomAppBar(
+                  title: 'Edit Profile'.tr,
+                  showLeading: true,
+                  onBackTap: () => Get.back(),
+                ),
+                body: _ProfileContent(onSave: _submitProfile),
+              ),
+
+              if (_isLoading)
+                Container(
+                  color: Colors.black.withOpacity(0.5),
+                  child: Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        FunicaLoader(),
+                        Gap(4),
+                        MyText(text: "Updating Profile...",
+                        size: 12.0,
+
+                         color: kDynamicText(context),),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _submitProfile(Map<String, dynamic> profileData) async {
+    if (_validateForm(profileData)) {
+      setState(() => _isLoading = true);
+
+      // Show FunicaLoader for 2 seconds
+      await Future.delayed(const Duration(seconds: 2));
+
+      // Update profile data
+      _controller.updateUserName(profileData['fullName']!);
+      _controller.updateEmail(profileData['email']!);
+      _controller.updatePhone(profileData['phone']!);
+
+      AppToast.success('Profile updated successfully');
+
+      // Exit screen
+      Get.back();
+    }
+  }
+
+  bool _validateForm(Map<String, dynamic> profileData) {
+    if (profileData['fullName']!.isEmpty) {
+      AppToast.error('Please enter your full name'.tr);
+      return false;
+    }
+    if (profileData['email']!.isEmpty || !profileData['email']!.contains('@')) {
+      AppToast.error('Please enter a valid email'.tr);
+      return false;
+    }
+    if (profileData['phone']!.isEmpty) {
+      AppToast.error('Please enter your phone number'.tr);
+      return false;
+    }
+    return true;
+  }
+}
+
+class _ProfileContent extends StatefulWidget {
+  final Function(Map<String, dynamic>) onSave;
+
+  const _ProfileContent({required this.onSave});
+
+  @override
+  State<_ProfileContent> createState() => _ProfileContentState();
+}
+
+class _ProfileContentState extends State<_ProfileContent> {
+  final ProfileController _controller = Get.find<ProfileController>();
   final TextEditingController _fullNameController = TextEditingController();
-  final TextEditingController _nicknameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _bioController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _genderController = TextEditingController();
   final TextEditingController _countryCodeController = TextEditingController();
-
   Country? _selectedCountry;
 
   @override
   void initState() {
     super.initState();
-    // Set default country
+    _loadExistingData();
     _selectedCountry = Country(
       phoneCode: "1",
       countryCode: "US",
@@ -53,7 +143,13 @@ class _FillUpProfileDetailScreenState extends State<FillUpProfileDetailScreen> {
     _countryCodeController.text = '+${_selectedCountry!.phoneCode}';
   }
 
-  Future<void> _selectDate(BuildContext context) async {
+  void _loadExistingData() {
+    _fullNameController.text = _controller.userName;
+    _emailController.text = _controller.email;
+    _phoneController.text = _controller.phone.replaceFirst('+1 ', '');
+  }
+
+  Future<void> _selectDate() async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -61,58 +157,10 @@ class _FillUpProfileDetailScreenState extends State<FillUpProfileDetailScreen> {
       lastDate: DateTime.now(),
     );
     if (picked != null) {
-      setState(() {
-        _controller.selectedDate = picked;
-        // Format: 21/Sep/2025
-        _dateController.text = DateFormat("dd/MMM/yyyy").format(picked);
-      });
+      setState(
+        () => _dateController.text = DateFormat("dd/MMM/yyyy").format(picked),
+      );
     }
-  }
-
-  void _showImagePickerSheet() {
-    Get.bottomSheet(
-      Container(
-        padding: AppSizes.DEFAULT,
-        decoration: BoxDecoration(
-          color: kDynamicScaffoldBackground(context),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Wrap(
-          children: [
-            ListTile(
-              leading: Icon(Icons.camera_alt, color: kDynamicIcon(context)),
-              title: MyText(
-                text: "Capture from Camera",
-                color: kDynamicText(context),
-              ),
-              onTap: () {
-                _controller.pickFromCamera();
-                Get.back();
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.photo, color: kDynamicIcon(context)),
-              title: MyText(
-                text: "Choose from Gallery",
-                color: kDynamicText(context),
-              ),
-              onTap: () {
-                _controller.pickFromGallery();
-                Get.back();
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.delete, color: Colors.red),
-              title: MyText(text: "Remove", color: kDynamicText(context)),
-              onTap: () {
-                _controller.removeImage();
-                Get.back();
-              },
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   void _showGenderBottomSheet() {
@@ -121,7 +169,7 @@ class _FillUpProfileDetailScreenState extends State<FillUpProfileDetailScreen> {
         padding: AppSizes.DEFAULT,
         decoration: BoxDecoration(
           color: kDynamicScaffoldBackground(context),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -140,46 +188,48 @@ class _FillUpProfileDetailScreenState extends State<FillUpProfileDetailScreen> {
                 ),
               ],
             ),
-            Gap(16),
+            const Gap(16),
             MyText(
               text: "Select Gender".tr,
               size: 18,
               color: kDynamicText(context),
-
               weight: FontWeight.bold,
             ),
-            Gap(20),
-            ...['Male', 'Female', 'Other'].map((gender) {
-              return Bounce(
-                onTap: () {
-                  setState(() {
-                    _genderController.text = gender;
-                  });
-                  Get.back();
-                },
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  margin: EdgeInsets.only(bottom: 12),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(6),
-                    color: kDynamicContainer(context),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      MyText(
-                        text: gender.tr,
-                        size: 14,
-                        weight: FontWeight.w500,
-                        color: kSubText,
+            const Gap(20),
+            ...['Male', 'Female', 'Other']
+                .map(
+                  (gender) => Bounce(
+                    onTap: () {
+                      setState(() => _genderController.text = gender);
+                      Get.back();
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
                       ),
-                      if (_genderController.text == gender)
-                        Icon(Icons.check, color: kPrimaryColor),
-                    ],
+                      margin: const EdgeInsets.only(bottom: 12),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(6),
+                        color: kDynamicContainer(context),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          MyText(
+                            text: gender.tr,
+                            size: 14,
+                            weight: FontWeight.w500,
+                            color: kDynamicSubtitleText(context),
+                          ),
+                          if (_genderController.text == gender)
+                            Icon(Icons.check, color: kPrimaryColor),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-              );
-            }).toList(),
+                )
+                .toList(),
           ],
         ),
       ),
@@ -200,7 +250,7 @@ class _FillUpProfileDetailScreenState extends State<FillUpProfileDetailScreen> {
         flagSize: 25,
         backgroundColor: kDynamicModalBackground(context),
         textStyle: TextStyle(color: kDynamicText(context)),
-        borderRadius: BorderRadius.only(
+        borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(20),
           topRight: Radius.circular(20),
         ),
@@ -208,268 +258,140 @@ class _FillUpProfileDetailScreenState extends State<FillUpProfileDetailScreen> {
     );
   }
 
+  Map<String, dynamic> _getProfileData() {
+    return {
+      'fullName': _fullNameController.text,
+      'email': _emailController.text,
+      'phone': '${_countryCodeController.text}${_phoneController.text}',
+      'dateOfBirth': _dateController.text,
+      'gender': _genderController.text,
+    };
+  }
+
+  void _handleSave() {
+    widget.onSave(_getProfileData());
+  }
+
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<ThemeController>(
-      builder: (themeController) {
-        return AnnotatedRegion<SystemUiOverlayStyle>(
-          value: SystemUiOverlayStyle(
-            statusBarColor: Colors.transparent,
-            statusBarIconBrightness: themeController.isDarkMode
-                ? Brightness.light
-                : Brightness.dark,
-            systemNavigationBarColor: kDynamicScaffoldBackground(context),
-            systemNavigationBarIconBrightness: themeController.isDarkMode
-                ? Brightness.light
-                : Brightness.dark,
-          ),
-          child: Scaffold(
-            backgroundColor: kDynamicScaffoldBackground(context),
-            appBar: CustomAppBar(
-              title: 'Fill Up Profile'.tr,
-              showLeading: true,
-              onBackTap: () => Get.back(),
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Column(
+          children: [
+            const Gap(20),
+            _buildFormFields(),
+            const Gap(20),
+            _buildSaveButton(),
+            const Gap(20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFormFields() {
+    return Column(
+      children: [
+        MyTextField(
+          controller: _fullNameController,
+          hint: "Full Name".tr,
+          prefix: SvgPicture.asset(
+            Assets.personfilled,
+            height: 20,
+            colorFilter: ColorFilter.mode(
+              kDynamicIcon(context),
+              BlendMode.srcIn,
             ),
-            body: SafeArea(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Column(
+          ),
+        ),
+        const Gap(12),
+        MyTextField(
+          controller: _dateController,
+          hint: "Date of Birth".tr,
+          suffix: SvgPicture.asset(
+            Assets.calendarfilled,
+            colorFilter: ColorFilter.mode(
+              kDynamicIcon(context),
+              BlendMode.srcIn,
+            ),
+          ),
+          onTap: _selectDate,
+        ),
+        const Gap(12),
+        MyTextField(
+          controller: _genderController,
+          hint: "Gender".tr,
+          suffix: SvgPicture.asset(
+            Assets.pencilfilled,
+            height: 20,
+            colorFilter: ColorFilter.mode(
+              kDynamicIcon(context),
+              BlendMode.srcIn,
+            ),
+          ),
+          onTap: _showGenderBottomSheet,
+        ),
+        const Gap(12),
+        MyTextField(
+          controller: _emailController,
+          hint: "Email".tr,
+          keyboardType: TextInputType.emailAddress,
+          prefix: SvgPicture.asset(
+            Assets.emailfilled,
+            colorFilter: ColorFilter.mode(
+              kDynamicIcon(context),
+              BlendMode.srcIn,
+            ),
+          ),
+        ),
+        const Gap(12),
+        Row(
+          children: [
+            SizedBox(
+              width: 100,
+              child: MyTextField(
+                controller: _countryCodeController,
+                hint: "+1",
+                isReadOnly: true,
+                onTap: _showCountryPicker,
+                prefix: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Gap(20),
-
-                    // Profile Picture
-                    GetBuilder<FillUpProfileController>(
-                      builder: (controller) {
-                        return Stack(
-                          children: [
-                            CircleAvatar(
-                              radius: 76,
-                              backgroundColor: kDynamicBackground(context),
-                              child: CircleAvatar(
-                                radius: 80,
-                                backgroundColor: kDynamicContainer(context),
-                                backgroundImage: controller.profileImage != null
-                                    ? FileImage(controller.profileImage!)
-                                    : null,
-                                child: controller.profileImage == null
-                                    ? Icon(
-                                        Icons.person,
-                                        size: 100,
-                                        color: Colors.grey.shade600,
-                                      )
-                                    : null,
-                              ),
-                            ),
-
-                            Positioned(
-                              bottom: 0,
-                              right: 0,
-                              child: GestureDetector(
-                                onTap: _showImagePickerSheet,
-                                child: Container(
-                                  height: 30,
-                                  width: 30,
-                                  decoration: BoxDecoration(
-                                    color: kDynamicContainer(context),
-                                    borderRadius: BorderRadius.circular(10.0),
-                                    border: Border.all(
-                                      color: kDynamicBorder(context),
-                                      width: 2,
-                                    ),
-                                  ),
-                                  child: Center(
-                                    child: SvgPicture.asset(
-                                      Assets.pencilfilled,
-                                      height: 20,
-                                      color: kDynamicIcon(context),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        );
-                      },
+                    MyText(text: _selectedCountry?.flagEmoji ?? "🌍", size: 20),
+                    const Gap(6),
+                    MyText(
+                      text: "+${_selectedCountry?.phoneCode ?? ''}",
+                      size: 16,
+                      color: kDynamicText(context),
+                      weight: FontWeight.w500,
                     ),
-
-                    const Gap(20),
-
-                    // Full Name
-                    MyTextField(
-                      controller: _fullNameController,
-                      hint: "Full Name".tr,
-                      prefix: SvgPicture.asset(
-                        Assets.personfilled,
-                        height: 20,
-                        color: kDynamicIcon(context),
-                      ),
-                    ),
-                    const Gap(12),
-
-                    // Nickname
-                    MyTextField(
-                      controller: _nicknameController,
-                      hint: "Nickname".tr,
-                      prefix: SvgPicture.asset(
-                        Assets.personfilled,
-                        height: 20,
-                        color: kDynamicIcon(context),
-                      ),
-                    ),
-                    const Gap(12),
-
-                    // Date of Birth
-                    MyTextField(
-                      controller: _dateController,
-                      hint: "Date of Birth".tr,
-                      suffix: SvgPicture.asset(
-                        Assets.calendarfilled,
-                        color: kDynamicIcon(context),
-                      ),
-
-                      onTap: () => _selectDate(context),
-                    ),
-                    const Gap(12),
-
-                    // Gender
-                    MyTextField(
-                      controller: _genderController,
-                      hint: "Gender".tr,
-                      suffix: SvgPicture.asset(
-                        height: 20,
-                        Assets.pencilfilled,
-                        color: kDynamicIcon(context),
-                      ),
-                      onTap: _showGenderBottomSheet,
-                    ),
-                    const Gap(12),
-
-                    // Email
-                    MyTextField(
-                      controller: _emailController,
-                      hint: "Email".tr,
-                      keyboardType: TextInputType.emailAddress,
-                      prefix: SvgPicture.asset(
-                        Assets.emailfilled,
-                        color: kDynamicIcon(context),
-                      ),
-                    ),
-                    const Gap(12),
-
-                    // Phone Number with Country Picker
-                    Row(
-                      children: [
-                        // Country Code Picker
-                        SizedBox(
-                          width: 100,
-                          child: MyTextField(
-                            controller: _countryCodeController,
-                            hint: "+1",
-                            isReadOnly: true,
-                            onTap: _showCountryPicker,
-                            prefix: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                MyText(
-                                  text: _selectedCountry?.flagEmoji ?? "🌍",
-                                  size: 20,
-                                ),
-                                Gap(6),
-                                MyText(
-                                  text: "+${_selectedCountry?.phoneCode ?? ''}",
-                                  size: 16,
-                                  color: kDynamicText(context),
-                                  weight: FontWeight.w500,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-
-                        const Gap(8),
-
-                        // Phone Number Field
-                        Expanded(
-                          child: MyTextField(
-                            controller: _phoneController,
-                            hint: "Phone Number".tr,
-                            keyboardType: TextInputType.phone,
-                            prefix: SvgPicture.asset(
-                              Assets.phonefilled,
-                              color: kDynamicIcon(context),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    // const Gap(12),
-
-                    // // Bio
-                    // MyTextField(
-                    //   controller: _bioController,
-                    //   hint: "Bio".tr,
-                    //   maxLines: 4,
-                    //   prefix: SvgPicture.asset(
-                    //     Assets.biofilled,
-                    //     color: kDynamicIcon(context),
-                    //   ),
-                    // ),
-                    const Gap(20),
-
-                    // Submit Button
-                    GetBuilder<FillUpProfileController>(
-                      builder: (controller) {
-                        return MyButton(
-                          buttonText: "Submit".tr,
-                          onTap: () async {
-                            if (_validateForm()) {
-                              await _controller.submitProfile(
-                                fullName: _fullNameController.text,
-                                nickname: _nicknameController.text,
-                                email: _emailController.text,
-                                phone:
-                                    '${_countryCodeController.text}${_phoneController.text}',
-                                bio: _bioController.text,
-                                gender: _genderController.text,
-                                dateOfBirth: _controller.selectedDate,
-                              );
-
-                              if (controller.isSuccess) {
-                                Get.off(() => const CreatePinScreen());
-                              } else if (controller.errorMessage.isNotEmpty) {
-                                AppToast.error(controller.errorMessage);
-                              }
-                            }
-                          },
-                          isLoading: controller.isLoading,
-                        );
-                      },
-                    ),
-
-                    const Gap(20),
                   ],
                 ),
               ),
             ),
-          ),
-        );
-      },
+            const Gap(8),
+            Expanded(
+              child: MyTextField(
+                controller: _phoneController,
+                hint: "Phone Number".tr,
+                keyboardType: TextInputType.phone,
+                prefix: SvgPicture.asset(
+                  Assets.phonefilled,
+                  colorFilter: ColorFilter.mode(
+                    kDynamicIcon(context),
+                    BlendMode.srcIn,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
-  bool _validateForm() {
-    if (_fullNameController.text.isEmpty) {
-      AppToast.error('Please enter your full name'.tr);
-      return false;
-    }
-    if (_emailController.text.isEmpty || !_emailController.text.contains('@')) {
-      AppToast.error('Please enter a valid email'.tr);
-      return false;
-    }
-    if (_phoneController.text.isEmpty) {
-      AppToast.error('Please enter your phone number'.tr);
-      return false;
-    }
-    return true;
+  Widget _buildSaveButton() {
+    return MyButton(buttonText: "Save Changes".tr, onTap: _handleSave);
   }
 }

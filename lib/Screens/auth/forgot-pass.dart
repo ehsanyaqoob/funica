@@ -396,14 +396,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               children: [
                 MyText(
                   text: title,
-                  size: 16.0,
+                  size: 14.0,
                   weight: FontWeight.w600,
                   color: kSubText4,
                 ),
                 const Gap(6),
                 MyText(
                   text: subtitle,
-                  size: 14.0,
+                  size: 10.0,
                   weight: FontWeight.bold,
                   color: kDynamicText(context),
                 ),

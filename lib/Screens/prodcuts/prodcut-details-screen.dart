@@ -391,10 +391,9 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                       )),
                     ],
                   ),
-                  const Spacer(),
-                  Expanded(
+  const Gap(60.0),                  Expanded(
                     child: MyButtonWithIcon(
-                      iconPath: Assets.cartfilled,
+                      iconPath: Assets.cartfilled, 
                       text: "Add to Cart",
                       onTap: _handleAddToCart,
                     ),

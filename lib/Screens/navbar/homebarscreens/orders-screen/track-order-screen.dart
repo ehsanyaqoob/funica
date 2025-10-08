@@ -93,8 +93,15 @@ class _TrackOrderScreenState extends State<TrackOrderScreen> {
               onBackTap: () => Get.back(),
             ),
             body: RefreshIndicator(
-              backgroundColor: kDynamicScaffoldBackground(context),
-              color: kDynamicPrimary(context),
+              color: kDynamicIcon(context),
+                backgroundColor: kDynamicScaffoldBackground(context),
+                displacement: 40,
+                strokeWidth: 2.5,
+                edgeOffset: 0,
+                notificationPredicate: (notification) {
+                  // Only trigger refresh when at the top
+                  return notification.metrics.pixels == 0;
+                },
               onRefresh: () async {
                 // Show custom loader during refresh
                 Get.dialog(

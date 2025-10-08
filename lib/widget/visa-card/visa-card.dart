@@ -5,10 +5,10 @@ import 'package:intl/intl.dart';
 class CustomVisaCard extends StatefulWidget {
   final String name;
   final String cardNumber;
-  final double balance;
-  final VoidCallback? onTopUp;
+  final double balance; // This will now be dynamic
   final String expiryDate;
   final String cvv;
+  final VoidCallback? onTopUp;
 
   const CustomVisaCard({
     Key? key,

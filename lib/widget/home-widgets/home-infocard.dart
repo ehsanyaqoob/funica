@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:funica/constants/export.dart';
 import 'package:funica/controller/profile-data-cont.dart';
 
@@ -13,6 +12,7 @@ class UserInfoRow extends StatelessWidget {
     this.onNotificationTap,
     this.onFavoriteTap,
   }) : super(key: key);
+
   String getGreeting() {
     final hour = DateTime.now().hour;
     if (hour < 12) {
@@ -26,11 +26,9 @@ class UserInfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final FillUpProfileController controller = Get.put(
-      FillUpProfileController(),
-    );
+    final ProfileController controller = Get.find<ProfileController>();
 
-    return GetBuilder<FillUpProfileController>(
+    return GetBuilder<ProfileController>(
       builder: (_) {
         return Row(
           children: [
@@ -50,7 +48,10 @@ class UserInfoRow extends StatelessWidget {
                       ? SvgPicture.asset(
                           Assets.personfilled,
                           height: 28,
-                          color: kDynamicIcon(context),
+                          colorFilter: ColorFilter.mode(
+                            kDynamicIcon(context),
+                            BlendMode.srcIn,
+                          ),
                         )
                       : null,
                 ),
@@ -70,11 +71,8 @@ class UserInfoRow extends StatelessWidget {
                     weight: FontWeight.w600,
                     color: kDynamicText(context).withOpacity(0.7),
                   ),
-
                   MyText(
-                    text: controller.userName?.isNotEmpty == true
-                        ? controller.userName!
-                        : 'Andrew Ainsley',
+                    text: controller.userName,
                     size: 18,
                     weight: FontWeight.bold,
                     color: kDynamicText(context),
@@ -90,14 +88,20 @@ class UserInfoRow extends StatelessWidget {
                   onPressed: onNotificationTap ?? () {},
                   icon: SvgPicture.asset(
                     Assets.notificationunfilled,
-                    color: kDynamicIcon(context),
+                    colorFilter: ColorFilter.mode(
+                      kDynamicIcon(context),
+                      BlendMode.srcIn,
+                    ),
                   ),
                 ),
                 IconButton(
                   onPressed: onFavoriteTap ?? () {},
                   icon: SvgPicture.asset(
                     Assets.heartunfilled,
-                    color: kDynamicIcon(context),
+                    colorFilter: ColorFilter.mode(
+                      kDynamicIcon(context),
+                      BlendMode.srcIn,
+                    ),
                   ),
                 ),
               ],
