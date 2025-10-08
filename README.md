@@ -122,9 +122,9 @@ Track orders and deliveries directly in the app
 Funica is built to make furnishing your home smarter, easier, and more beautiful.
 
 📬 Contact
+👨‍💻 Ehsan Yaqoob
+📧 ehsanyaqoob07@gmail.com
 
-👨‍💻 Developer: Ehsan Yaqoob
-📧 Email: ehsanyaqoob07@gmail.com
-
-📱 Project: Funica — Smart Modern Furniture App
+📱 Funica — Smart Modern Furniture App
 💙 Built With: Flutter
+
