@@ -108,6 +108,11 @@ class Assets {
   static const String apple = "assets/images/apple.svg";
   static const String facebook = "assets/images/facebook.svg";
   static const String personfilled = "assets/images/personfilled.svg";
+  static const String security = "assets/images/security.svg";
+  static const String language = "assets/images/language.svg";
+  static const String privacy = "assets/images/privacy.svg";
+  static const String help = "assets/images/help.svg";
+  static const String invite = "assets/images/invite.svg";
 
   static const String phonefilled = "assets/images/phonefilled.svg";
   static const String phoneunfilled = "assets/images/phoneunfilled.svg";
@@ -215,21 +220,10 @@ class Assets {
   static const String down = "assets/images/down.svg";
   static const String visa = "assets/images/visa.svg";
   static const String visacard = "assets/images/visacard.svg";
+  static const String ahead = "assets/images/ahead.svg";
 
 
 
-
-  static const String imagesFignerprintScan =
-      "assets/images/fignerprint_scan.png";
-
-  /// Assets for imagesFingerprintSimple
-  /// assets/images/fingerprint-simple.png
-  static const String imagesFingerprintSimple =
-      "assets/images/fingerprint-simple.png";
-
-  /// Assets for imagesFlagEnglish
-  /// assets/images/flag_english.png
-  static const String imagesFlagEnglish = "assets/images/flag_english.png";
 
   /// Assets for imagesFlagIraq
   /// assets/images/flag_iraq.png

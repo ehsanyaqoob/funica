@@ -1,40 +1,35 @@
 import 'dart:io';
-import 'dart:math';
+import 'package:funica/config/theme/theme-cont.dart';
+import 'package:funica/constants/export.dart';
+import 'package:funica/widget/toasts.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:get_storage/get_storage.dart';
 
-class FillUpProfileController extends GetxController {
+class ProfileController extends GetxController {
   final RxBool _isLoading = false.obs;
   final RxString _errorMessage = ''.obs;
   final RxBool _isSuccess = false.obs;
-  DateTime? _selectedDate;
   final Rx<File?> _profileImage = Rx<File?>(null);
-  final RxString _userName = ''.obs;
-  final RxString _nickname = ''.obs;
-  final RxString _email = ''.obs;
-  final RxString _phone = ''.obs;
-  final RxString _bio = ''.obs;
-  final RxString _gender = ''.obs;
+  final RxString _userName = 'Andrew Ainsley'.obs;
+  final RxString _phone = '+1 467 378 399'.obs;
+  final RxString _email = 'andrew.ainsley@email.com'.obs;
+  final RxBool _isDarkMode = false.obs;
+  final RxString _language = 'English (US)'.obs;
+  final RxBool _notificationsEnabled = true.obs;
 
   final GetStorage _storage = GetStorage();
 
   bool get isLoading => _isLoading.value;
   String get errorMessage => _errorMessage.value;
   bool get isSuccess => _isSuccess.value;
-  DateTime? get selectedDate => _selectedDate;
   File? get profileImage => _profileImage.value;
   String get userName => _userName.value;
-  String get nickname => _nickname.value;
-  String get email => _email.value;
   String get phone => _phone.value;
-  String get bio => _bio.value;
-  String get gender => _gender.value;
-
-  set selectedDate(DateTime? date) {
-    _selectedDate = date;
-    update();
-  }
+  String get email => _email.value;
+  bool get isDarkMode => _isDarkMode.value;
+  String get language => _language.value;
+  bool get notificationsEnabled => _notificationsEnabled.value;
 
   @override
   void onInit() {
@@ -42,120 +37,150 @@ class FillUpProfileController extends GetxController {
     _loadFromStorage();
   }
 
-  /// Pick image from gallery
   Future<void> pickFromGallery() async {
-    final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (picked != null) {
-      _profileImage.value = File(picked.path);
-      update();
-    }
-  }
-
-  /// Capture image from camera
-  Future<void> pickFromCamera() async {
-    final picked = await ImagePicker().pickImage(source: ImageSource.camera);
-    if (picked != null) {
-      _profileImage.value = File(picked.path);
-      update();
-    }
-  }
-
-  /// Remove image
-  void removeImage() {
-    _profileImage.value = null;
-    update();
-  }
-
-  /// Submit profile & save in GetStorage
-  Future<void> submitProfile({
-    required String fullName,
-    required String nickname,
-    required String email,
-    required String phone,
-    required String bio,
-    required String? gender,
-    required DateTime? dateOfBirth,
-  }) async {
-    _isLoading.value = true;
-    _errorMessage.value = '';
-    _isSuccess.value = false;
-    update();
-
     try {
-      await Future.delayed(const Duration(seconds: 2));
-      final randomSuccess = Random().nextBool();
-
-      if (randomSuccess) {
-        // Save in controller
-        _userName.value = fullName;
-        _nickname.value = nickname;
-        _email.value = email;
-        _phone.value = phone;
-        _bio.value = bio;
-        _gender.value = gender ?? '';
-        _selectedDate = dateOfBirth;
-
-        // Save in storage
-        await _storage.write('userName', fullName);
-        await _storage.write('nickname', nickname);
-        await _storage.write('email', email);
-        await _storage.write('phone', phone);
-        await _storage.write('bio', bio);
-        await _storage.write('gender', gender ?? '');
-        await _storage.write('dob', dateOfBirth?.toIso8601String() ?? '');
-        if (_profileImage.value != null) {
-          await _storage.write('profileImage', _profileImage.value!.path);
-        }
-
-        _isSuccess.value = true;
-        print('Profile saved successfully!');
-      } else {
-        throw Exception('Failed to save profile. Please try again.');
+      final picked = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 800,
+        maxHeight: 800,
+        imageQuality: 80,
+      );
+      if (picked != null) {
+        _profileImage.value = File(picked.path);
+        await _storage.write('profileImage', picked.path);
+        update();
+        AppToast.success('Profile picture updated');
       }
     } catch (e) {
-      _errorMessage.value = e.toString();
-    } finally {
-      _isLoading.value = false;
-      update();
+      AppToast.error('Failed to pick image');
     }
   }
 
-  /// Load saved profile from storage
-  void _loadFromStorage() {
-    _userName.value = _storage.read('userName') ?? '';
-    _nickname.value = _storage.read('nickname') ?? '';
-    _email.value = _storage.read('email') ?? '';
-    _phone.value = _storage.read('phone') ?? '';
-    _bio.value = _storage.read('bio') ?? '';
-    _gender.value = _storage.read('gender') ?? '';
-    final dobStr = _storage.read('dob') ?? '';
-    if (dobStr.isNotEmpty) {
-      _selectedDate = DateTime.tryParse(dobStr);
+  Future<void> pickFromCamera() async {
+    try {
+      final picked = await ImagePicker().pickImage(
+        source: ImageSource.camera,
+        maxWidth: 800,
+        maxHeight: 800,
+        imageQuality: 80,
+      );
+      if (picked != null) {
+        _profileImage.value = File(picked.path);
+        await _storage.write('profileImage', picked.path);
+        update();
+        AppToast.success('Profile picture updated');
+      }
+    } catch (e) {
+      AppToast.error('Failed to capture image');
     }
+  }
+
+  void removeImage() {
+    _profileImage.value = null;
+    _storage.remove('profileImage');
+    update();
+    AppToast.info('Profile picture removed');
+  }
+
+  void updateUserName(String name) {
+    _userName.value = name;
+    _storage.write('userName', name);
+    update();
+  }
+
+  void updatePhone(String newPhone) {
+    _phone.value = newPhone;
+    _storage.write('phone', newPhone);
+    update();
+  }
+
+  void updateEmail(String newEmail) {
+    _email.value = newEmail;
+    _storage.write('email', newEmail);
+    update();
+  }
+
+  void toggleDarkMode(bool value) {
+    _isDarkMode.value = value;
+    _storage.write('isDarkMode', value);
+    update();
+  }
+
+  void updateLanguage(String newLanguage) {
+    _language.value = newLanguage;
+    _storage.write('language', newLanguage);
+    update();
+    AppToast.info('Language changed to $newLanguage');
+  }
+
+  void toggleNotifications(bool value) {
+    _notificationsEnabled.value = value;
+    _storage.write('notificationsEnabled', value);
+    update();
+    AppToast.info(value ? 'Notifications enabled' : 'Notifications disabled');
+  }
+
+  void _loadFromStorage() {
+    _userName.value = _storage.read('userName') ?? 'Andrew Ainsley';
+    _phone.value = _storage.read('phone') ?? '+1 467 378 399';
+    _email.value = _storage.read('email') ?? 'andrew.ainsley@email.com';
+    _isDarkMode.value = _storage.read('isDarkMode') ?? false;
+    _language.value = _storage.read('language') ?? 'English (US)';
+    _notificationsEnabled.value = _storage.read('notificationsEnabled') ?? true;
+    
     final imagePath = _storage.read('profileImage') ?? '';
-    if (imagePath.isNotEmpty) {
+    if (imagePath.isNotEmpty && File(imagePath).existsSync()) {
       _profileImage.value = File(imagePath);
     }
   }
 
-  void clearError() {
-    _errorMessage.value = '';
-    update();
+  void logout() {
+    Get.dialog(
+      AlertDialog(
+        backgroundColor: kDynamicCard(Get.context!),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: MyText(
+          text: 'Logout',
+          size: 20,
+          weight: FontWeight.bold,
+          color: kDynamicText(Get.context!),
+        ),
+        content: MyText(
+          text: 'Are you sure you want to logout?',
+          size: 16,
+          color: kDynamicSubtitleText(Get.context!),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: MyText(
+              text: 'Cancel',
+              color: kDynamicSubtitleText(Get.context!),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back();
+              _performLogout();
+            },
+            child: MyText(
+              text: 'Logout',
+              color: kDynamicSystemRed(Get.context!),
+              weight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
-  void reset() {
-    _isLoading.value = false;
-    _errorMessage.value = '';
-    _isSuccess.value = false;
-    _selectedDate = null;
-    _profileImage.value = null;
-    _userName.value = '';
-    _nickname.value = '';
-    _email.value = '';
-    _phone.value = '';
-    _bio.value = '';
-    _gender.value = '';
+  void _performLogout() {
     _storage.erase();
+    AppToast.success('Logged out successfully');
+  }
+
+  void clearError() {
+    _errorMessage.value = '';
     update();
   }
 
@@ -165,11 +190,8 @@ class FillUpProfileController extends GetxController {
     _errorMessage.close();
     _isSuccess.close();
     _userName.close();
-    _nickname.close();
-    _email.close();
     _phone.close();
-    _bio.close();
-    _gender.close();
+    _email.close();
     _profileImage.close();
     super.onClose();
   }

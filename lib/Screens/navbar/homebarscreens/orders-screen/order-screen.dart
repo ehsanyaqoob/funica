@@ -48,7 +48,7 @@ class _OrderScreenState extends State<OrderScreen> {
               },
               searchHint: "Search orders...",
               onSettingsTap: (){
-                 Get.to(SettingsScreen(), transition: Transition.fadeIn, duration: Duration(milliseconds: 500));
+                 Get.to(SettingsScreen(), transition: Transition.cupertino, duration: Duration(milliseconds: 500));
               },
             ),
             body: GetBuilder<OrderController>(
@@ -147,8 +147,15 @@ class _OrderScreenState extends State<OrderScreen> {
 
   Widget _buildRefreshableOrderList(List<Order> orders, String emptyTitle, String emptySubtitle) {
     return RefreshIndicator(
-      backgroundColor: kDynamicScaffoldBackground(Get.context!),
-      color: kDynamicPrimary(Get.context!),
+      color: kDynamicIcon(context),
+                backgroundColor: kDynamicScaffoldBackground(context),
+                displacement: 40,
+                strokeWidth: 2.5,
+                edgeOffset: 0,
+                notificationPredicate: (notification) {
+                  // Only trigger refresh when at the top
+                  return notification.metrics.pixels == 0;
+                },
       onRefresh: () async {
         // Show your custom loader in a dialog
         Get.dialog(

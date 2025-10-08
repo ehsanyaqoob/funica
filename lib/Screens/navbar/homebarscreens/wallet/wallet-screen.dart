@@ -1,9 +1,12 @@
+import 'package:flutter/material.dart';
 import 'package:funica/Screens/navbar/homebarscreens/wallet/all-transaction-details-screen.dart';
+import 'package:funica/Screens/navbar/homebarscreens/wallet/top-up-screen.dart';
 import 'package:funica/Screens/navbar/homebarscreens/wallet/transaction-lists.dart';
 import 'package:funica/Screens/settings.dart';
 import 'package:funica/constants/export.dart';
 import 'package:funica/controller/e-wallet-cont.dart';
 import 'package:funica/widget/custom_appbar.dart';
+import 'package:funica/widget/toasts.dart';
 import 'package:funica/widget/visa-card/visa-card.dart';
 
 class WalletScreen extends StatefulWidget {
@@ -14,6 +17,20 @@ class WalletScreen extends StatefulWidget {
 }
 
 class _WalletScreenState extends State<WalletScreen> {
+  final WalletController _walletController = Get.put(WalletController());
+  final ScrollController _scrollController = ScrollController();
+
+  Future<void> _onRefresh() async {
+    // Simulate API call delay
+    await Future.delayed(const Duration(milliseconds: 1500));
+    
+    // Refresh wallet data
+    _walletController.refreshWalletData();
+    
+    // Show success feedback
+    AppToast.success('Wallet updated successfully');
+  }
+
   @override
   Widget build(BuildContext context) {
     return GetBuilder<ThemeController>(
@@ -36,82 +53,102 @@ class _WalletScreenState extends State<WalletScreen> {
               title: "My E-Wallet",
               showSearch: true,
               onSearchChanged: (query) {
-                Get.find<WalletController>().searchTransactions(query);
+                _walletController.searchTransactions(query);
               },
-              // onSearchCleared: () {
-              //   Get.find<WalletController>().clearSearch();
-              // },
               searchHint: "Search transactions...",
               onSettingsTap: () {
                 Get.to(
                   const SettingsScreen(),
-                  transition: Transition.fadeIn,
+                  transition: Transition.cupertino,
                   duration: const Duration(milliseconds: 500),
                 );
               },
             ),
             body: SafeArea(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Padding(
-                  padding: AppSizes.DEFAULT,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      CustomVisaCard(
-                        name: 'Andrew Ainsley',
-                        cardNumber: '4629362001543629',
-                        balance: 9000000.0,
-                        expiryDate: "05/28",
-                        cvv: "123",
-                        onTopUp: () {
-                          // Handle top up
-                        },
-                      ),
-                      const Gap(20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          MyText(
-                            text: 'Transaction History',
-                            size: 18,
-                            weight: FontWeight.bold,
-                            color: kDynamicText(context),
-                          ),
-                          Bounce(
-                            onTap: () => Get.to(
-                              const AllTransaction(),
-                              transition: Transition.cupertino,
-                              duration: const Duration(milliseconds: 500),
-                            ),
-                            child: MyText(
-                              text: 'See All',
-                              size: 14,
-                              weight: FontWeight.w600,
+              child: RefreshIndicator(
+                onRefresh: _onRefresh,
+                color: kDynamicIcon(context),
+                backgroundColor: kDynamicScaffoldBackground(context),
+                displacement: 40,
+                strokeWidth: 2.5,
+                edgeOffset: 0,
+                notificationPredicate: (notification) {
+                  // Only trigger refresh when at the top
+                  return notification.metrics.pixels == 0;
+                },
+                child: SingleChildScrollView(
+                  controller: _scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Padding(
+                    padding: AppSizes.DEFAULT,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Dynamic Visa Card with real-time balance
+                        GetBuilder<WalletController>(
+                          builder: (walletController) {
+                            return CustomVisaCard(
+                              name: 'Andrew Ainsley',
+                              cardNumber: '4629362001543629',
+                              balance: walletController.currentBalance,
+                              expiryDate: "05/28",
+                              cvv: "123",
+                              onTopUp: () {
+                                Get.to(
+                                  TopUpScreen(), 
+                                  transition: Transition.cupertino, 
+                                  duration: const Duration(milliseconds: 500)
+                                );
+                              },
+                            );
+                          },
+                        ),
+                        const Gap(20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            MyText(
+                              text: 'Transaction History',
+                              size: 18,
+                              weight: FontWeight.bold,
                               color: kDynamicText(context),
                             ),
-                          ),
-                        ],
-                      ),
-                      const Gap(10),
-                      GetBuilder<WalletController>(
-                        init: WalletController(),
-                        builder: (walletController) {
-                          final transactions =
-                              walletController.transactions.length >= 10
-                              ? walletController.transactions
-                              : _getExtendedTransactions(
-                                  walletController.transactions,
-                                );
+                            Bounce(
+                              onTap: () => Get.to(
+                                const AllTransaction(),
+                                transition: Transition.cupertino,
+                                duration: const Duration(milliseconds: 500),
+                              ),
+                              child: MyText(
+                                text: 'See All',
+                                size: 14,
+                                weight: FontWeight.w600,
+                                color: kDynamicText(context),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const Gap(10),
+                        GetBuilder<WalletController>(
+                          builder: (walletController) {
+                            final transactions =
+                                walletController.transactions.length >= 10
+                                ? walletController.transactions
+                                : _getExtendedTransactions(
+                                    walletController.transactions,
+                                  );
 
-                          return WalletTransactionsList(
-                            transactions: transactions,
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                          );
-                        },
-                      ),
-                    ],
+                            return WalletTransactionsList(
+                              transactions: transactions,
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                            );
+                          },
+                        ),
+                        // Add some bottom padding for better scrolling
+                        const Gap(20),
+                      ],
+                    ),
                   ),
                 ),
               ),
