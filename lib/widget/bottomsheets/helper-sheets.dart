@@ -1,5 +1,6 @@
 import 'package:funica/Screens/navbar/cart/choose-shiping.dart';
 import 'package:funica/Screens/navbar/cart/shippin-screen.dart';
+import 'package:funica/Screens/navbar/navbar-screen.dart';
 import 'package:funica/constants/export.dart';
 import 'package:funica/controller/order-cont.dart';
 import 'package:funica/controller/prodcut-cont.dart';
@@ -10,627 +11,795 @@ import 'package:funica/widget/dot-loader.dart';
 import 'package:funica/widget/toasts.dart';
 
 class BottomSheetHelper {
+  // Payment Processing Sheet - Enhanced Version
+  static void showPaymentProcessingSheet({
+    required List<CartItem> cartItems,
+    required double totalAmount,
+    required String selectedAddress,
+    required ShippingOption selectedShipping,
+    required PromoCode? appliedPromo,
+    required double discountAmount,
+    required String selectedPaymentMethod,
+    required Function() onPaymentSuccess,
+  }) {
+    try {
+      final double finalTotal =
+          totalAmount + selectedShipping.price - discountAmount;
 
- // Payment Processing Sheet - Optimized Version
-static void showPaymentProcessingSheet({
-  required List<CartItem> cartItems,
-  required double totalAmount,
-  required String selectedAddress,
-  required ShippingOption selectedShipping,
-  required PromoCode? appliedPromo,
-  required double discountAmount,
-  required String selectedPaymentMethod,
-  required Function() onPaymentSuccess,
-}) {
-  try {
-    final double finalTotal = totalAmount + selectedShipping.price - discountAmount;
+      // Create order details for display
+      final orderNumber = "ORD-${DateTime.now().millisecondsSinceEpoch}";
+      final orderDate = DateTime.now();
+      final estimatedDelivery = DateTime.now().add(const Duration(days: 3));
 
-    // Create order details for display
-    final orderNumber = "ORD-${DateTime.now().millisecondsSinceEpoch}";
-    final orderDate = DateTime.now();
-
-    // Show loading first
-    Get.dialog(
-      AlertDialog(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        insetPadding: const EdgeInsets.all(20),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: kDynamicCard(Get.context!),
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 60,
-                    height: 60,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: kDynamicPrimary(Get.context!),
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    child: CircularProgressIndicator(
-                      strokeWidth: 3,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      backgroundColor: kDynamicPrimary(Get.context!)!.withOpacity(0.3),
-                    ),
-                  ),
-                  const Gap(16),
-                  MyText(
-                    text: "Processing Payment...",
-                    size: 16,
-                    weight: FontWeight.w600,
-                    color: kDynamicText(Get.context!),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-      barrierDismissible: false,
-    );
-
-    // After 3 seconds, show the success sheet
-    Future.delayed(const Duration(seconds: 3), () {
-      if (Get.isDialogOpen ?? false) {
-        Get.back(); // Close loading dialog
-      }
-      
-      _showSuccessSheet(
-        cartItems: cartItems,
-        totalAmount: totalAmount,
-        selectedAddress: selectedAddress,
-        selectedShipping: selectedShipping,
-        appliedPromo: appliedPromo,
-        discountAmount: discountAmount,
-        selectedPaymentMethod: selectedPaymentMethod,
-        finalTotal: finalTotal,
-        orderNumber: orderNumber,
-        orderDate: orderDate,
-        onPaymentSuccess: onPaymentSuccess,
-      );
-    });
-  } catch (e) {
-    print('Error in payment processing: $e');
-    // Fallback: Just navigate to success
-    onPaymentSuccess();
-  }
-}
-
-static void _showSuccessSheet({
-  required List<CartItem> cartItems,
-  required double totalAmount,
-  required String selectedAddress,
-  required ShippingOption selectedShipping,
-  required PromoCode? appliedPromo,
-  required double discountAmount,
-  required String selectedPaymentMethod,
-  required double finalTotal,
-  required String orderNumber,
-  required DateTime orderDate,
-  required Function() onPaymentSuccess,
-}) {
-  try {
-    // Create and save order immediately
-    final newOrder = Order(
-      orderNumber: orderNumber,
-      orderDate: orderDate,
-      items: cartItems,
-      totalAmount: finalTotal,
-      shippingAddress: selectedAddress,
-      paymentMethod: selectedPaymentMethod,
-      status: OrderStatus.confirmed,
-      estimatedDelivery: DateTime.now().add(const Duration(days: 3)),
-    );
-
-    // Save to orders controller
-    final orderController = Get.find<OrderController>();
-    orderController.addNewOrder(newOrder);
-
-    // Clear cart
-    final productController = Get.find<ProductController>();
-    productController.clearCart();
-
-    Get.bottomSheet(
-      Container(
-        height: Get.height * 0.78, // Slightly taller for better spacing
-        decoration: BoxDecoration(
-          color: kDynamicCard(Get.context!),
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(32.0), // More rounded
-            topRight: Radius.circular(32.0), // More rounded
-          ),
-        ),
-        child: Column(
-          children: [
-            // Draggable handle - centered
-            Center(
-              child: Container(
-                margin: const EdgeInsets.only(top: 12, bottom: 8),
-                width: 60, // Wider handle
-                height: 5, // Thicker handle
+      // Show loading first
+      Get.dialog(
+        AlertDialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          insetPadding: const EdgeInsets.all(20),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: kDynamicListTileSubtitle(Get.context!)!.withOpacity(0.4),
-                  borderRadius: BorderRadius.circular(4), // Rounded handle
+                  color: kDynamicCard(Get.context!),
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    FunicaLoader(),
+                    const Gap(16),
+                    MyText(
+                      text: "Processing Payment...",
+                      size: 16,
+                      weight: FontWeight.w600,
+                      color: kDynamicText(Get.context!),
+                    ),
+                  ],
                 ),
               ),
+            ],
+          ),
+        ),
+        barrierDismissible: false,
+      );
+
+      // After 3 seconds, show the success sheet
+      Future.delayed(const Duration(seconds: 3), () {
+        if (Get.isDialogOpen ?? false) {
+          Get.back(); // Close loading dialog
+        }
+
+        _showSuccessSheet(
+          cartItems: cartItems,
+          totalAmount: totalAmount,
+          selectedAddress: selectedAddress,
+          selectedShipping: selectedShipping,
+          appliedPromo: appliedPromo,
+          discountAmount: discountAmount,
+          selectedPaymentMethod: selectedPaymentMethod,
+          finalTotal: finalTotal,
+          orderNumber: orderNumber,
+          orderDate: orderDate,
+          estimatedDelivery: estimatedDelivery,
+          onPaymentSuccess: onPaymentSuccess,
+        );
+      });
+    } catch (e) {
+      print('Error in payment processing: $e');
+      // Fallback: Just navigate to success
+      onPaymentSuccess();
+    }
+  }
+
+  static void _showSuccessSheet({
+    required List<CartItem> cartItems,
+    required double totalAmount,
+    required String selectedAddress,
+    required ShippingOption selectedShipping,
+    required PromoCode? appliedPromo,
+    required double discountAmount,
+    required String selectedPaymentMethod,
+    required double finalTotal,
+    required String orderNumber,
+    required DateTime orderDate,
+    required DateTime estimatedDelivery,
+    required Function() onPaymentSuccess,
+  }) {
+    try {
+      // Create initial status history
+      final statusHistory = [
+        OrderStatusUpdate(
+          status: OrderStatus.pending,
+          timestamp: orderDate,
+          note: 'Order placed successfully',
+        ),
+        OrderStatusUpdate(
+          status: OrderStatus.confirmed,
+          timestamp: DateTime.now(),
+          note:
+              'Payment confirmed via ${_getPaymentMethodName(selectedPaymentMethod)}',
+        ),
+      ];
+
+      // Create and save order immediately
+      final newOrder = Order(
+        orderNumber: orderNumber,
+        orderDate: orderDate,
+        items: cartItems,
+        totalAmount: finalTotal,
+        shippingAddress: selectedAddress,
+        paymentMethod: selectedPaymentMethod,
+        status: OrderStatus.confirmed,
+        estimatedDelivery: estimatedDelivery,
+        statusHistory: statusHistory,
+      );
+
+      // Save to orders controller
+      final orderController = Get.find<OrderController>();
+      orderController.addNewOrder(newOrder);
+
+      // Clear cart
+      final productController = Get.find<ProductController>();
+      productController.clearCart();
+
+      Get.bottomSheet(
+        Container(
+          height: Get.height * 0.75, // Increased height for more content
+          decoration: BoxDecoration(
+            color: kDynamicCard(Get.context!),
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(32.0),
+              topRight: Radius.circular(32.0),
             ),
-            
-            Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Header with close button
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          MyText(
-                            text: "Order Confirmed!",
-                            size: 22, // Slightly larger
-                            weight: FontWeight.w700,
-                            color: kDynamicText(Get.context!),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              _safeCloseSheet(onPaymentSuccess);
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: kDynamicScaffoldBackground(Get.context!),
-                                borderRadius: BorderRadius.circular(16), // More rounded
-                              ),
-                              child: SvgPicture.asset(
-                                Assets.close,
-                                height: 20,
-                                color: kDynamicIcon(Get.context!),
-                              ),
+          ),
+          child: Column(
+            children: [
+              // Draggable handle - centered
+              Center(
+                child: Container(
+                  margin: const EdgeInsets.only(top: 12, bottom: 8),
+                  width: 60,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: kDynamicListTileSubtitle(
+                      Get.context!,
+                    )!.withOpacity(0.4),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ),
+
+              // Header with close button
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 8,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    MyText(
+                      text: "Order Confirmed!",
+                      size: 22,
+                      weight: FontWeight.w700,
+                      color: kDynamicText(Get.context!),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        _safeCloseSheetAndNavigateToOrders(onPaymentSuccess);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: kDynamicScaffoldBackground(Get.context!),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: SvgPicture.asset(
+                          Assets.close,
+                          height: 20,
+                          color: kDynamicIcon(Get.context!),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const Gap(8),
+
+              Expanded(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Success Message
+                        Container(
+                          padding: const EdgeInsets.all(18),
+                          decoration: BoxDecoration(
+                            color: kDynamicSystemGreen(
+                              Get.context!,
+                            )!.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: kDynamicSystemGreen(
+                                Get.context!,
+                              )!.withOpacity(0.3),
                             ),
                           ),
-                        ],
-                      ),
-                      const Gap(24),
-
-                      // Success Message
-                      Container(
-                        padding: const EdgeInsets.all(18),
-                        decoration: BoxDecoration(
-                          color: kDynamicSystemGreen(Get.context!)!.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(20), // More rounded
-                          border: Border.all(
-                            color: kDynamicSystemGreen(Get.context!)!.withOpacity(0.3),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: kDynamicSystemGreen(Get.context!),
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                                child: SvgPicture.asset(
+                                  Assets.check,
+                                    height: 20,
+                          color: kDynamicIcon(Get.context!),
+                                ),
+                              ),
+                              const Gap(14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    MyText(
+                                      text: "Payment Successful!",
+                                      size: 16,
+                                      weight: FontWeight.w700,
+                                      color: kDynamicSystemGreen(Get.context!),
+                                    ),
+                                    const Gap(4),
+                                    MyText(
+                                      text:
+                                          "Your order #$orderNumber has been confirmed",
+                                      size: 13,
+                                      color: kDynamicSystemGreen(Get.context!),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: kDynamicSystemGreen(Get.context!),
-                                borderRadius: BorderRadius.circular(25), // More rounded
-                              ),
-                              child: SvgPicture.asset(
-                                Assets.check,
-                                height: 18,
-                                color: Colors.white,
-                              ),
+
+                        const Gap(24),
+
+                        // Order Summary Card
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: kDynamicScaffoldBackground(Get.context!),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: kDynamicBorder(Get.context!),
+                              width: 1.2,
                             ),
-                            const Gap(14),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  MyText(
-                                    text: "Payment Successful!",
-                                    size: 16,
-                                    weight: FontWeight.w700,
-                                    color: kDynamicSystemGreen(Get.context!),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              MyText(
+                                text: "Order Summary",
+                                size: 18,
+                                weight: FontWeight.w700,
+                                color: kDynamicText(Get.context!),
+                              ),
+                              const Gap(16),
+
+                              // Order Items Preview
+                              ...cartItems
+                                  .take(2)
+                                  .map(
+                                    (item) => Padding(
+                                      padding: const EdgeInsets.only(
+                                        bottom: 12,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          CommonImageView(
+                                            url: item.product.image,
+                                            height: 50,
+                                            width: 50,
+                                            radius: 8,
+                                            fit: BoxFit.fill,
+                                          ),
+                                          const Gap(12),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                MyText(
+                                                  text: item.product.title,
+                                                  size: 14,
+                                                  weight: FontWeight.w500,
+                                                  color: kDynamicText(
+                                                    Get.context!,
+                                                  ),
+                                                  maxLines: 1,
+                                                  textOverflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                                const Gap(4),
+                                                MyText(
+                                                  text:
+                                                      "Qty: ${item.quantity} • \$${item.totalPrice.toStringAsFixed(2)}",
+                                                  size: 12,
+                                                  color:
+                                                      kDynamicListTileSubtitle(
+                                                        Get.context!,
+                                                      ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                   ),
-                                  const Gap(4),
-                                  MyText(
-                                    text: "Your order has been placed successfully",
-                                    size: 13,
-                                    color: kDynamicSystemGreen(Get.context!),
+
+                              if (cartItems.length > 2) ...[
+                                const Gap(8),
+                                MyText(
+                                  text: "+ ${cartItems.length - 2} more items",
+                                  size: 12,
+                                  color: kDynamicListTileSubtitle(Get.context!),
+                                ),
+                              ],
+
+                              const Gap(16),
+                              Divider(
+                                color: kDynamicBorder(Get.context!)!,
+                                height: 1,
+                              ),
+                              const Gap(16),
+
+                              // Price Breakdown
+                              _buildPriceRow(
+                                "Subtotal",
+                                "\$${totalAmount.toStringAsFixed(2)}",
+                              ),
+                              const Gap(8),
+                              _buildPriceRow(
+                                "Shipping",
+                                "\$${selectedShipping.price.toStringAsFixed(2)}",
+                              ),
+                              if (appliedPromo != null) ...[
+                                const Gap(8),
+                                _buildPriceRow(
+                                  "Discount (${appliedPromo.code})",
+                                  "-\$${discountAmount.toStringAsFixed(2)}",
+                                  isDiscount: true,
+                                ),
+                              ],
+                              const Gap(12),
+                              Divider(
+                                color: kDynamicBorder(Get.context!)!,
+                                height: 1,
+                              ),
+                              const Gap(12),
+                              _buildTotalRow(
+                                "Total Amount",
+                                "\$${finalTotal.toStringAsFixed(2)}",
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const Gap(20),
+
+                        // Order Details Card
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: kDynamicScaffoldBackground(Get.context!),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: kDynamicBorder(Get.context!),
+                              width: 1.2,
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              MyText(
+                                text: "Order Details",
+                                size: 18,
+                                weight: FontWeight.w700,
+                                color: kDynamicText(Get.context!),
+                              ),
+                              const Gap(16),
+
+                              // Order Information
+                              _buildDetailRow("Order Number", orderNumber),
+                              const Gap(8),
+                              _buildDetailRow(
+                                "Order Date",
+                                "${orderDate.day}/${orderDate.month}/${orderDate.year} ${orderDate.hour}:${orderDate.minute.toString().padLeft(2, '0')}",
+                              ),
+                              const Gap(8),
+                              _buildDetailRow(
+                                "Estimated Delivery",
+                                "${estimatedDelivery.day}/${estimatedDelivery.month}/${estimatedDelivery.year}",
+                              ),
+                              const Gap(8),
+                              _buildDetailRow(
+                                "Total Items",
+                                "${cartItems.length}",
+                              ),
+
+                              const Gap(16),
+                              Divider(
+                                color: kDynamicBorder(Get.context!)!,
+                                height: 1,
+                              ),
+                              const Gap(16),
+
+                              // Shipping & Payment
+                              _buildDetailRowWithIcon(
+                                "Shipping Method",
+                                "${selectedShipping.title} • \$${selectedShipping.price.toStringAsFixed(2)}",
+                                Assets.tracking,
+                              ),
+                              const Gap(12),
+                              _buildDetailRowWithIcon(
+                                "Payment Method",
+                                _getPaymentMethodName(selectedPaymentMethod),
+                                _getPaymentMethodIcon(selectedPaymentMethod),
+                              ),
+                              const Gap(12),
+                              _buildDetailRowWithIcon(
+                                "Delivery Address",
+                                selectedAddress,
+                                Assets.loaction,
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const Gap(20),
+
+                        // Next Steps Card
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: kDynamicPrimary(
+                              Get.context!,
+                            )!.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: kDynamicPrimary(
+                                Get.context!,
+                              )!.withOpacity(0.3),
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: kDynamicPrimary(Get.context!),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: SvgPicture.asset(
+                                      Assets.info,
+                                      height: 20,
+                          color: kDynamicIcon(Get.context!),
+                                    ),
+                                  ),
+                                  const Gap(12),
+                                  Expanded(
+                                    child: MyText(
+                                      text: "What's Next?",
+                                      size: 16,
+                                      weight: FontWeight.w700,
+                                      color: kDynamicPrimary(Get.context!),
+                                    ),
                                   ),
                                 ],
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const Gap(24),
-
-                      // Order Summary Card
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: kDynamicScaffoldBackground(Get.context!),
-                          borderRadius: BorderRadius.circular(20), // More rounded
-                          border: Border.all(
-                            color: kDynamicBorder(Get.context!),
-                            width: 1.2,
-                          ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            MyText(
-                              text: "Order Details",
-                              size: 18,
-                              weight: FontWeight.w700,
-                              color: kDynamicText(Get.context!),
-                            ),
-                            const Gap(16),
-
-                            // Order Number & Date
-                            _buildDetailRow("Order Number", orderNumber),
-                            const Gap(8),
-                            _buildDetailRow("Order Date", 
-                              "${orderDate.day}/${orderDate.month}/${orderDate.year}"),
-
-                            const Gap(16),
-                            Divider(
-                              color: kDynamicBorder(Get.context!)!, 
-                              thickness: 1,
-                              height: 1,
-                            ),
-                            const Gap(12),
-
-                            // Items List
-                            MyText(
-                              text: "Items (${cartItems.length})",
-                              size: 16,
-                              weight: FontWeight.w600,
-                              color: kDynamicText(Get.context!),
-                            ),
-                            const Gap(12),
-
-                            ...cartItems.take(2).map(
-                              (item) => Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: _buildOrderItem(item),
+                              const Gap(12),
+                              _buildNextStep(
+                                "1. Order Processing",
+                                "We'll start preparing your items within 24 hours",
                               ),
-                            ),
-
-                            if (cartItems.length > 2) ...[
-                              const Gap(6),
-                              MyText(
-                                text: "+ ${cartItems.length - 2} more items",
-                                size: 13,
-                                color: kDynamicListTileSubtitle(Get.context!),
-                              ),
-                            ],
-
-                            const Gap(16),
-                            Divider(
-                              color: kDynamicBorder(Get.context!)!, 
-                              thickness: 1,
-                              height: 1,
-                            ),
-
-                            // Price Breakdown
-                            const Gap(12),
-                            _buildPriceRow("Subtotal", "\$${totalAmount.toStringAsFixed(2)}"),
-                            const Gap(8),
-                            _buildPriceRow("Shipping", "\$${selectedShipping.price.toStringAsFixed(2)}"),
-
-                            if (appliedPromo != null) ...[
                               const Gap(8),
-                              _buildPriceRow(
-                                "Discount (${appliedPromo.code})",
-                                "-\$${discountAmount.toStringAsFixed(2)}",
-                                isDiscount: true,
+                              _buildNextStep(
+                                "2. Shipping Updates",
+                                "Track your order in real-time from the Orders tab",
+                              ),
+                              const Gap(8),
+                              _buildNextStep(
+                                "3. Delivery",
+                                "Expected delivery: ${estimatedDelivery.day}/${estimatedDelivery.month}/${estimatedDelivery.year}",
                               ),
                             ],
-
-                            const Gap(12),
-                            Divider(
-                              color: kDynamicBorder(Get.context!)!, 
-                              thickness: 1,
-                              height: 1,
-                            ),
-                            const Gap(12),
-
-                            // Total
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                MyText(
-                                  text: "Total Amount",
-                                  size: 17,
-                                  weight: FontWeight.w700,
-                                  color: kDynamicText(Get.context!),
-                                ),
-                                MyText(
-                                  text: "\$${finalTotal.toStringAsFixed(2)}",
-                                  size: 20,
-                                  weight: FontWeight.bold,
-                                  color: kDynamicPrimary(Get.context!),
-                                ),
-                              ],
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
 
-                      const Gap(24),
+                        const Gap(24),
 
-                      // Payment & Shipping Info
-                      Column(
-                        children: [
-                          _buildInfoCard(
-                            icon: _getPaymentMethodIcon(selectedPaymentMethod),
-                            title: "Payment Method",
-                            subtitle: _getPaymentMethodName(selectedPaymentMethod),
-                          ),
-                          const Gap(16),
-                          _buildInfoCard(
-                            icon: Assets.loaction,
-                            title: "Shipping To",
-                            subtitle: selectedAddress,
-                            maxLines: 3,
-                          ),
-                        ],
-                      ),
+                        // Track Order Button
+                        MyButtonWithIcon(
+                          iconPath: Assets.info,
+                          text: "Track Your Order",
+                          onTap: () {
+                            _safeCloseSheetAndNavigateToOrders(
+                              onPaymentSuccess,
+                            );
+                          },
+                          
+                        ),
 
-                      const Gap(32), // Extra space at bottom for better scrolling
-                    ],
+                        const Gap(32),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-
-            // Fixed button at bottom with better padding
-            Container(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 24), // More padding
-              decoration: BoxDecoration(
-                color: kDynamicCard(Get.context!),
-                border: Border(
-                  top: BorderSide(
-                    color: kDynamicBorder(Get.context!)!,
-                    width: 1,
-                  ),
-                ),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
-                ),
-              ),
-              child: MyButton(
-                buttonText: "View My Orders",
-                onTap: () {
-                  _safeCloseSheet(onPaymentSuccess);
-                },
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      enableDrag: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(32.0),
-          topRight: Radius.circular(32.0),
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        enableDrag: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(32.0),
+            topRight: Radius.circular(32.0),
+          ),
         ),
-      ),
-    );
-  } catch (e) {
-    print('Error showing success sheet: $e');
-    // Fallback: Close any open dialogs and navigate
-    if (Get.isBottomSheetOpen ?? false) Get.back();
-    onPaymentSuccess();
-  }
-}
-
-// Helper method for safe sheet closing
-static void _safeCloseSheet(Function() onSuccess) {
-  try {
-    if (Get.isBottomSheetOpen ?? false) {
-      Get.back();
+      );
+    } catch (e) {
+      print('Error showing success sheet: $e');
+      // Fallback: Close any open dialogs and navigate
+      if (Get.isBottomSheetOpen ?? false) Get.back();
+      onPaymentSuccess();
     }
-    onSuccess();
-  } catch (e) {
-    print('Error closing sheet: $e');
-    // Final fallback
-    Get.back();
   }
-}
 
-// Helper method for detail rows
-static Widget _buildDetailRow(String label, String value) {
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-      MyText(
-        text: label,
-        size: 14,
-        color: kDynamicListTileSubtitle(Get.context!),
-      ),
-      Flexible(
-        child: MyText(
-          text: value,
-          size: 14,
-          weight: FontWeight.w600,
-          color: kDynamicText(Get.context!),
-          textAlign: TextAlign.right,
-        ),
-      ),
-    ],
-  );
-}
+  // Enhanced helper method for safe sheet closing and navigation
+  static void _safeCloseSheetAndNavigateToOrders(Function() onSuccess) {
+    try {
+      if (Get.isBottomSheetOpen ?? false) {
+        Get.back();
+      }
 
-// Helper method for order items
-static Widget _buildOrderItem(CartItem item) {
-  return Row(
-    children: [
-      CommonImageView(
-        url: item.product.image,
-        height: 45,
-        width: 45,
-        radius: 10, // More rounded
-        fit: BoxFit.cover,
-      ),
-      const Gap(14),
-      Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            MyText(
-              text: item.product.title,
-              size: 14,
-              weight: FontWeight.w500,
-              color: kDynamicText(Get.context!),
-              maxLines: 1,
-              textOverflow: TextOverflow.ellipsis,
-            ),
-            const Gap(4),
-            MyText(
-              text: "Quantity: ${item.quantity}",
-              size: 12,
-              color: kDynamicListTileSubtitle(Get.context!),
-            ),
-          ],
-        ),
-      ),
-      MyText(
-        text: "\$${item.totalPrice.toStringAsFixed(2)}",
-        size: 14,
-        weight: FontWeight.w600,
-        color: kDynamicText(Get.context!),
-      ),
-    ],
-  );
-}
+      // Navigate to navbar and switch to orders tab
+      Get.offAll(
+        () => FunicaNavBar(),
+        transition: Transition.cupertino,
+        duration: const Duration(milliseconds: 500),
+      );
 
-// Helper method for info cards
-static Widget _buildInfoCard({
-  required String icon,
-  required String title,
-  required String subtitle,
-  int maxLines = 2,
-}) {
-  return Container(
-    width: double.infinity,
-    padding: const EdgeInsets.all(18),
-    decoration: BoxDecoration(
-      color: kDynamicScaffoldBackground(Get.context!),
-      borderRadius: BorderRadius.circular(18), // More rounded
-      border: Border.all(
-        color: kDynamicBorder(Get.context!),
-        width: 1.2,
-      ),
-    ),
-    child: Column(
+      // Switch to orders tab (index 3)
+      Future.delayed(const Duration(milliseconds: 300), () {
+        try {
+          final navController = Get.find<NavController>();
+          navController.changeIndex(3);
+          AppToast.success(
+            "Order placed successfully! Track your order in the Active tab.",
+          );
+        } catch (e) {
+          print('Error switching to orders tab: $e');
+        }
+      });
+
+      onSuccess();
+    } catch (e) {
+      print('Error closing sheet: $e');
+      // Final fallback
+      Get.offAll(() => FunicaNavBar());
+    }
+  }
+
+  // New helper method for next steps
+  static Widget _buildNextStep(String step, String description) {
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: kDynamicCard(Get.context!),
-                borderRadius: BorderRadius.circular(12), // More rounded
-                border: Border.all(
-                  color: kDynamicBorder(Get.context!),
-                ),
-              ),
-              child: SvgPicture.asset(
-                icon,
-                height: 20,
-                color: kDynamicIcon(Get.context!),
-              ),
-            ),
-            const Gap(12),
-            MyText(
-              text: title,
-              size: 15,
-              weight: FontWeight.w600,
-              color: kDynamicText(Get.context!),
-            ),
-          ],
+        Container(
+          width: 6,
+          height: 6,
+          margin: const EdgeInsets.only(top: 8, right: 12),
+          decoration: BoxDecoration(
+            color: kDynamicPrimary(Get.context!),
+            shape: BoxShape.circle,
+          ),
         ),
-        const Gap(10),
-        Padding(
-          padding: const EdgeInsets.only(left: 50),
-          child: MyText(
-            text: subtitle,
-            size: 13,
-            color: kDynamicListTileSubtitle(Get.context!),
-            maxLines: maxLines,
-            textOverflow: TextOverflow.ellipsis,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              MyText(
+                text: step,
+                size: 14,
+                weight: FontWeight.w600,
+                color: kDynamicText(Get.context!),
+              ),
+              const Gap(2),
+              MyText(
+                text: description,
+                size: 12,
+                color: kDynamicListTileSubtitle(Get.context!),
+              ),
+            ],
           ),
         ),
       ],
-    ),
-  );
-}
-
-// Keep existing _buildPriceRow, _getPaymentMethodIcon, _getPaymentMethodName methods
-static Widget _buildPriceRow(String label, String value, {bool isDiscount = false}) {
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-      MyText(
-        text: label,
-        size: 14,
-        color: isDiscount
-            ? kDynamicSystemGreen(Get.context!)
-            : kDynamicListTileSubtitle(Get.context!),
-      ),
-      MyText(
-        text: value,
-        size: 14,
-        color: isDiscount
-            ? kDynamicSystemGreen(Get.context!)
-            : kDynamicText(Get.context!),
-        weight: isDiscount ? FontWeight.w600 : FontWeight.normal,
-      ),
-    ],
-  );
-}
-
-static String _getPaymentMethodIcon(String methodId) {
-  switch (methodId) {
-    case "wallet": return Assets.walletfilled;
-    case "paypal": return Assets.paypal;
-    case "google_pay": return Assets.google;
-    case "apple_pay": return Assets.apple;
-    case "stripe": return Assets.walletfilled;
-    case "amazon_pay": return Assets.amazon;
-    default: return Assets.walletfilled;
+    );
   }
-}
 
-static String _getPaymentMethodName(String methodId) {
-  switch (methodId) {
-    case "wallet": return "My Wallet";
-    case "paypal": return "PayPal";
-    case "google_pay": return "Google Pay";
-    case "apple_pay": return "Apple Pay";
-    case "stripe": return "Credit/Debit Card";
-    case "amazon_pay": return "Amazon Pay";
-    default: return "My Wallet";
+  // Enhanced detail row with icon
+  static Widget _buildDetailRowWithIcon(
+    String label,
+    String value,
+    String iconPath,
+  ) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: kDynamicPrimary(Get.context!)!.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: SvgPicture.asset(
+            iconPath,
+            height: 16,
+            color: kDynamicPrimary(Get.context!),
+          ),
+        ),
+        const Gap(12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              MyText(
+                text: label,
+                size: 12,
+                color: kDynamicListTileSubtitle(Get.context!),
+              ),
+              const Gap(2),
+              MyText(
+                text: value,
+                size: 14,
+                weight: FontWeight.w600,
+                color: kDynamicText(Get.context!),
+                maxLines: 2,
+                textOverflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
-}
 
+  // Enhanced detail row
+  static Widget _buildDetailRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        MyText(
+          text: label,
+          size: 14,
+          color: kDynamicListTileSubtitle(Get.context!),
+        ),
+        Flexible(
+          child: MyText(
+            text: value,
+            size: 14,
+            weight: FontWeight.w600,
+            color: kDynamicText(Get.context!),
+            textAlign: TextAlign.right,
+          ),
+        ),
+      ],
+    );
+  }
 
+  // Enhanced price row
+  static Widget _buildPriceRow(
+    String label,
+    String value, {
+    bool isDiscount = false,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        MyText(
+          text: label,
+          size: 14,
+          color: isDiscount
+              ? kDynamicSystemGreen(Get.context!)
+              : kDynamicListTileSubtitle(Get.context!),
+        ),
+        MyText(
+          text: value,
+          size: 14,
+          color: isDiscount
+              ? kDynamicSystemGreen(Get.context!)
+              : kDynamicText(Get.context!),
+          weight: isDiscount ? FontWeight.w600 : FontWeight.normal,
+        ),
+      ],
+    );
+  }
 
+  // Total row
+  static Widget _buildTotalRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        MyText(
+          text: label,
+          size: 16,
+          weight: FontWeight.w700,
+          color: kDynamicText(Get.context!),
+        ),
+        MyText(
+          text: value,
+          size: 18,
+          weight: FontWeight.w700,
+          color: kDynamicPrimary(Get.context!),
+        ),
+      ],
+    );
+  }
 
+  // Payment method icons and names (keep existing)
+  static String _getPaymentMethodIcon(String methodId) {
+    switch (methodId) {
+      case "wallet":
+        return Assets.walletfilled;
+      case "paypal":
+        return Assets.paypal;
+      case "google_pay":
+        return Assets.google;
+      case "apple_pay":
+        return Assets.apple;
+      case "stripe":
+        return Assets.walletfilled;
+      case "amazon_pay":
+        return Assets.amazon;
+      default:
+        return Assets.walletfilled;
+    }
+  }
+
+  static String _getPaymentMethodName(String methodId) {
+    switch (methodId) {
+      case "wallet":
+        return "My Wallet";
+      case "paypal":
+        return "PayPal";
+      case "google_pay":
+        return "Google Pay";
+      case "apple_pay":
+        return "Apple Pay";
+      case "stripe":
+        return "Credit/Debit Card";
+      case "amazon_pay":
+        return "Amazon Pay";
+      default:
+        return "My Wallet";
+    }
+  }
 
   // Generic confirmation bottom sheet for removing items with item preview
   static void showRemoveItemSheet({

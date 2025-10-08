@@ -36,17 +36,11 @@ class _SeeAllCategoryTabState extends State<SeeAllCategoryTab> {
             backgroundColor: kDynamicScaffoldBackground(context),
             body: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  CategoryTabBarRow(
-                    categories: widget.categories,   
-                    onCategorySelected: (selectedCategory) {
-                      
-                    },
-                  ),
-                  const Gap(20),
+              child: CategoryTabBarRow(
+                categories: widget.categories,   
+                onCategorySelected: (selectedCategory) {
                   
-                ],
+                },
               ),
             ),
           ),

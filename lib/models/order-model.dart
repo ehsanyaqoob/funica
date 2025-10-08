@@ -1,4 +1,3 @@
-// models/order_model.dart
 import 'package:funica/models/product-model.dart';
 
 class Order {
@@ -10,6 +9,7 @@ class Order {
   final String paymentMethod;
   final OrderStatus status;
   final DateTime estimatedDelivery;
+  final List<OrderStatusUpdate> statusHistory;
 
   Order({
     required this.orderNumber,
@@ -20,6 +20,7 @@ class Order {
     required this.paymentMethod,
     required this.status,
     required this.estimatedDelivery,
+    required this.statusHistory,
   });
 
   // Convert Order to JSON
@@ -31,8 +32,9 @@ class Order {
       'totalAmount': totalAmount,
       'shippingAddress': shippingAddress,
       'paymentMethod': paymentMethod,
-      'status': status.toString(),
+      'status': status.toString().split('.').last, // Store as string without enum prefix
       'estimatedDelivery': estimatedDelivery.toIso8601String(),
+      'statusHistory': statusHistory.map((update) => update.toJson()).toList(),
     };
   }
 
@@ -49,25 +51,72 @@ class Order {
       paymentMethod: json['paymentMethod'],
       status: _statusFromString(json['status']),
       estimatedDelivery: DateTime.parse(json['estimatedDelivery']),
+      statusHistory: (json['statusHistory'] as List? ?? [])
+          .map((update) => OrderStatusUpdate.fromJson(update))
+          .toList(),
     );
   }
 
   // Convert string to OrderStatus
   static OrderStatus _statusFromString(String status) {
     switch (status) {
-      case 'OrderStatus.confirmed':
+      case 'pending':
+        return OrderStatus.pending;
+      case 'confirmed':
         return OrderStatus.confirmed;
-      case 'OrderStatus.processing':
+      case 'processing':
         return OrderStatus.processing;
-      case 'OrderStatus.shipped':
+      case 'shipped':
         return OrderStatus.shipped;
-      case 'OrderStatus.delivered':
+      case 'delivered':
         return OrderStatus.delivered;
-      case 'OrderStatus.cancelled':
+      case 'cancelled':
         return OrderStatus.cancelled;
       default:
         return OrderStatus.pending;
     }
+  }
+
+  // Helper method to create a new order with updated status
+  Order copyWith({
+    String? orderNumber,
+    DateTime? orderDate,
+    List<CartItem>? items,
+    double? totalAmount,
+    String? shippingAddress,
+    String? paymentMethod,
+    OrderStatus? status,
+    DateTime? estimatedDelivery,
+    List<OrderStatusUpdate>? statusHistory,
+  }) {
+    return Order(
+      orderNumber: orderNumber ?? this.orderNumber,
+      orderDate: orderDate ?? this.orderDate,
+      items: items ?? this.items,
+      totalAmount: totalAmount ?? this.totalAmount,
+      shippingAddress: shippingAddress ?? this.shippingAddress,
+      paymentMethod: paymentMethod ?? this.paymentMethod,
+      status: status ?? this.status,
+      estimatedDelivery: estimatedDelivery ?? this.estimatedDelivery,
+      statusHistory: statusHistory ?? this.statusHistory,
+    );
+  }
+
+  // Helper method to add a new status update
+  Order addStatusUpdate(OrderStatus newStatus, {String? note}) {
+    final newUpdate = OrderStatusUpdate(
+      status: newStatus,
+      timestamp: DateTime.now(),
+      note: note,
+    );
+    
+    final updatedHistory = List<OrderStatusUpdate>.from(statusHistory)
+      ..add(newUpdate);
+    
+    return copyWith(
+      status: newStatus,
+      statusHistory: updatedHistory,
+    );
   }
 }
 
@@ -78,6 +127,70 @@ enum OrderStatus {
   shipped,
   delivered,
   cancelled,
+}
+
+class OrderStatusUpdate {
+  final OrderStatus status;
+  final DateTime timestamp;
+  final String? note;
+
+  OrderStatusUpdate({
+    required this.status,
+    required this.timestamp,
+    this.note,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'status': status.toString().split('.').last,
+      'timestamp': timestamp.toIso8601String(),
+      'note': note,
+    };
+  }
+
+  factory OrderStatusUpdate.fromJson(Map<String, dynamic> json) {
+    return OrderStatusUpdate(
+      status: Order._statusFromString(json['status']),
+      timestamp: DateTime.parse(json['timestamp']),
+      note: json['note'],
+    );
+  }
+
+  // Get display text for the status
+  String get statusText {
+    switch (status) {
+      case OrderStatus.pending:
+        return "Order Placed";
+      case OrderStatus.confirmed:
+        return "Order Confirmed";
+      case OrderStatus.processing:
+        return "Processing";
+      case OrderStatus.shipped:
+        return "Shipped";
+      case OrderStatus.delivered:
+        return "Delivered";
+      case OrderStatus.cancelled:
+        return "Cancelled";
+    }
+  }
+
+  // Get description for the status
+  String get description {
+    switch (status) {
+      case OrderStatus.pending:
+        return "Your order has been placed and is awaiting confirmation";
+      case OrderStatus.confirmed:
+        return "Your order has been confirmed and is being processed";
+      case OrderStatus.processing:
+        return "Seller is preparing your order for shipment";
+      case OrderStatus.shipped:
+        return "Your order has been shipped and is on its way";
+      case OrderStatus.delivered:
+        return "Your order has been successfully delivered";
+      case OrderStatus.cancelled:
+        return "Your order has been cancelled";
+    }
+  }
 }
 
 class CartItem {
@@ -94,11 +207,12 @@ class CartItem {
             quantity;
 
   CartItem copyWith({
+    ProductModel? product,
     int? quantity,
     int? selectedColorIndex,
   }) {
     return CartItem(
-      product: product,
+      product: product ?? this.product,
       quantity: quantity ?? this.quantity,
       selectedColorIndex: selectedColorIndex ?? this.selectedColorIndex,
     );

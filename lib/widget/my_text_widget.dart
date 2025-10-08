@@ -1,4 +1,3 @@
-
 import 'package:funica/constants/export.dart';
 
 // ignore: must_be_immutable
@@ -22,6 +21,7 @@ class MyText extends StatelessWidget {
   final double? paddingRight;
   final double? paddingBottom;
   final double? letterSpacing;
+  final bool respectSystemFontSize; // New parameter
 
   const MyText({
     super.key,
@@ -43,12 +43,22 @@ class MyText extends StatelessWidget {
     this.paddingBottom = 0,
     this.onTap,
     this.fontStyle,
+    this.respectSystemFontSize = true, // Default to true
   });
 
   @override
   Widget build(BuildContext context) {
     final String currentLangCode = Get.locale?.languageCode ?? 'en';
     final bool isArabic = currentLangCode == 'ar' || currentLangCode == 'sa';
+    
+    // Get system text scale factor with reasonable limits
+    final double textScaleFactor = MediaQuery.textScaleFactorOf(context);
+    final double effectiveTextScaleFactor = _getEffectiveTextScaleFactor(textScaleFactor);
+    
+    // Calculate final font size
+    final double? finalFontSize = size != null 
+        ? size! * effectiveTextScaleFactor
+        : null;
 
     return Animate(
       effects: [FadeEffect(duration: Duration(milliseconds: 500))],
@@ -64,7 +74,7 @@ class MyText extends StatelessWidget {
           child: Text(
             "$text".tr,
             style: TextStyle(
-              fontSize: size,
+              fontSize: respectSystemFontSize ? finalFontSize : size,
               color: color ?? kWhite,
               fontWeight: weight,
               decoration: decoration,
@@ -78,10 +88,22 @@ class MyText extends StatelessWidget {
                 textAlign ?? (isArabic ? TextAlign.right : TextAlign.left),
             textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
             maxLines: maxLines,
-            overflow: textOverflow,
+            overflow: textOverflow ?? TextOverflow.ellipsis, // Always have a fallback
+            textScaler: respectSystemFontSize 
+                ? const TextScaler.linear(1.0) // We handle scaling manually in fontSize
+                : null,
           ),
         ),
       ),
     );
+  }
+
+  // Method to apply reasonable limits to text scaling
+  double _getEffectiveTextScaleFactor(double systemScaleFactor) {
+    // Define reasonable min and max bounds
+    const double minScale = 0.8;  // Don't go smaller than 80%
+    const double maxScale = 1.5;  // Don't go larger than 150%
+    
+    return systemScaleFactor.clamp(minScale, maxScale);
   }
 }

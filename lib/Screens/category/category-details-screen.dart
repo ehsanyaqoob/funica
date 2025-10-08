@@ -236,11 +236,12 @@ class _CategoryDetailsViewState extends State<CategoryDetailsView> {
                             itemCount: _filteredProducts.length,
                             gridDelegate:
                                 const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                  crossAxisSpacing: 12,
-                                  mainAxisSpacing: 12,
-                                  childAspectRatio: 0.75,
-                                ),
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 12,
+                              mainAxisSpacing: 12,
+                              childAspectRatio: 0.85, // Increased from 0.75
+                              mainAxisExtent: 260, // Added fixed height
+                            ),
                             itemBuilder: (context, index) {
                               final product = _filteredProducts[index];
                               return ProductCard(

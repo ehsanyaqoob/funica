@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:funica/Screens/navbar/cart/checkout-screen.dart';
+import 'package:funica/Screens/settings.dart';
 import 'package:funica/constants/export.dart';
 import 'package:funica/controller/prodcut-cont.dart';
 import 'package:funica/models/order-model.dart';
@@ -53,6 +54,9 @@ class _CartScreenState extends State<CartScreen> {
                 print("Searching products: $query");
               },
               searchHint: "Search products...",
+              onSettingsTap: (){
+                 Get.to(SettingsScreen(), transition: Transition.fadeIn, duration: Duration(milliseconds: 500));
+              },
             ),
             body: Obx(() {
               if (_productController.cartItems.isEmpty) {

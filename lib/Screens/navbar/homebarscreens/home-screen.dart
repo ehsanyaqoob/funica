@@ -444,117 +444,135 @@ class _HomeScreenState extends State<HomeScreen>
               : Scaffold(
                   backgroundColor: kDynamicScaffoldBackground(context),
                   body: SafeArea(
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.vertical,
-                      padding: AppSizes.DEFAULT,
-                      child: Column(
-                        children: [
-                          UserInfoRow(
-                            onAvatarTap: () => Get.to(
-                              () => const FillUpProfileDetailScreen(),
-                              transition: Transition.leftToRight,
-                            ),
-                            onNotificationTap: () => Get.to(
-                              () => const NotificationScreen(),
-                              transition: Transition.leftToRight,
-                            ),
-                            onFavoriteTap: () => Get.to(
-                              () => const FavouroteScreen(),
-                              transition: Transition.leftToRight,
-                            ),
-                          ),
-                          const Gap(20),
-                          MyTextField(
-                            keyboardType: TextInputType.name,
-                            hint: 'Search',
-                            prefix: SvgPicture.asset(
-                              Assets.searchunfilled,
-                              height: 20,
-                              color: kDynamicIcon(context),
-                            ),
-                            suffix: SvgPicture.asset(
-                              Assets.filter,
-                              height: 20,
-                              color: kDynamicIcon(context),
-                            ),
-                          ),
-                          const Gap(5.0),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              MyText(
-                                text: 'Special Offers',
-                                size: 18,
-                                weight: FontWeight.bold,
-                                color: kDynamicText(context),
-                              ),
-                              Bounce(
-                                onTap: () => Get.to(
-                                  () => SpecialOffersView(items: promoItems),
-                                ),
-                                child: MyText(
-                                  text: 'See All',
-                                  size: 14,
-                                  weight: FontWeight.w600,
-                                  color: kDynamicText(context),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const Gap(20),
-                          SwipeablePromoCards(
-                            items: promoItems,
-                            onCardTap: (index, item) =>
-                                Get.to(() => PromoDetailView(item: item)),
-                          ),
-                          const Gap(20),
-                          CategoryGrid(
-                            items: _categoriesWithoutAll,
-                            onTap: (index, category) {
-                              Get.to(
-                                () => CategoryDetailsView(
-                                  category: category,
-                                  allCategories: _categoriesWithoutAll,
-                                ),
-                              );
-                            },
-                          ),
-
-                          const Gap(20),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              MyText(
-                                text: 'Most Popular',
-                                size: 18,
-                                weight: FontWeight.bold,
-                                color: kDynamicText(context),
-                              ),
-                              Bounce(
-                                onTap: () => Get.to(
-                                  () => SeeAllCategoryTab(
-                                    categories: _allCategories,
+                    child: CustomScrollView(
+                      // Use CustomScrollView for better control
+                      slivers: [
+                        SliverList(
+                          delegate: SliverChildListDelegate([
+                            Padding(
+                              padding: AppSizes.DEFAULT,
+                              child: Column(
+                                children: [
+                                  UserInfoRow(
+                                    onAvatarTap: () => Get.to(
+                                      () => const FillUpProfileDetailScreen(),
+                                      transition: Transition.leftToRight,
+                                    ),
+                                    onNotificationTap: () => Get.to(
+                                      () => const NotificationScreen(),
+                                      transition: Transition.leftToRight,
+                                    ),
+                                    onFavoriteTap: () => Get.to(
+                                      () => const FavouroteScreen(),
+                                      transition: Transition.leftToRight,
+                                    ),
                                   ),
-                                ),
-                                child: MyText(
-                                  text: 'See All',
-                                  size: 14,
-                                  weight: FontWeight.w600,
-                                  color: kDynamicText(context),
-                                ),
+                                  const Gap(20),
+                                  MyTextField(
+                                    keyboardType: TextInputType.name,
+                                    hint: 'Search',
+                                    prefix: SvgPicture.asset(
+                                      Assets.searchunfilled,
+                                      height: 20,
+                                      color: kDynamicIcon(context),
+                                    ),
+                                    suffix: SvgPicture.asset(
+                                      Assets.filter,
+                                      height: 20,
+                                      color: kDynamicIcon(context),
+                                    ),
+                                  ),
+                                  const Gap(5.0),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      MyText(
+                                        text: 'Special Offers',
+                                        size: 18,
+                                        weight: FontWeight.bold,
+                                        color: kDynamicText(context),
+                                      ),
+                                      Bounce(
+                                        onTap: () => Get.to(
+                                          () => SpecialOffersView(
+                                            items: promoItems,
+                                          ),
+                                        ),
+                                        child: MyText(
+                                          text: 'See All',
+                                          size: 14,
+                                          weight: FontWeight.w600,
+                                          color: kDynamicText(context),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const Gap(20),
+                                  SwipeablePromoCards(
+                                    items: promoItems,
+                                    onCardTap: (index, item) => Get.to(
+                                      () => PromoDetailView(item: item),
+                                    ),
+                                  ),
+                                  const Gap(20),
+                                  CategoryGrid(
+                                    items: _categoriesWithoutAll,
+                                    onTap: (index, category) {
+                                      Get.to(
+                                        () => CategoryDetailsView(
+                                          category: category,
+                                          allCategories: _categoriesWithoutAll,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                  const Gap(20),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      MyText(
+                                        text: 'Most Popular',
+                                        size: 18,
+                                        weight: FontWeight.bold,
+                                        color: kDynamicText(context),
+                                      ),
+                                      Bounce(
+                                        onTap: () => Get.to(
+                                          () => SeeAllCategoryTab(
+                                            categories: _allCategories,
+                                          ),
+                                        ),
+                                        child: MyText(
+                                          text: 'See All',
+                                          size: 14,
+                                          weight: FontWeight.w600,
+                                          color: kDynamicText(context),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const Gap(10),
+                                ],
                               ),
-                            ],
+                            ),
+                          ]),
+                        ),
+                        SliverToBoxAdapter(
+                          // Use SliverToBoxAdapter for the CategoryTabBarRow
+                          child: SizedBox(
+                            height: 400, // Fixed height
+                            child: CategoryTabBarRow(
+                              categories: _allCategories,
+                              onCategorySelected: (selectedCategory) {
+                                // Handle category selection
+                              },
+                            ),
                           ),
-                          const Gap(10),
-                          CategoryTabBarRow(
-                            categories: _allCategories,
-                            onCategorySelected: (selectedCategory) {
-                              // Handle category selection
-                            },
-                          ),
-                          const Gap(20),
-                        ],
-                      ),
+                        ),
+                        SliverToBoxAdapter(child: Gap(20)),
+                      ],
                     ),
                   ),
                 ),

@@ -18,14 +18,13 @@ import 'package:funica/constants/export.dart';
 //ShowTrash: true
 //ShowText
 
-import 'package:funica/constants/export.dart';
-
 class GenericAppBar extends StatefulWidget implements PreferredSizeWidget {
   final String title;
   final bool showSearch;
   final Function(String)? onSearchChanged;
   final String? searchHint;
   final double logoSize;
+  final VoidCallback? onSettingsTap; // Add this
 
   const GenericAppBar({
     super.key,
@@ -34,6 +33,7 @@ class GenericAppBar extends StatefulWidget implements PreferredSizeWidget {
     this.onSearchChanged,
     this.searchHint,
     this.logoSize = 22.0,
+    this.onSettingsTap, // Add this
   });
 
   @override
@@ -98,12 +98,12 @@ class _GenericAppBarState extends State<GenericAppBar> {
     return GetBuilder<ThemeController>(
       builder: (themeController) {
         final bool isDarkMode = themeController.isDarkMode;
-        
+
         return AppBar(
-          backgroundColor: Colors.transparent,
+          backgroundColor: kDynamicScaffoldBackground(context),
           elevation: 0,
           automaticallyImplyLeading: false,
-          title: _isSearching 
+          title: _isSearching
               ? _buildSearchField()
               : Row(
                   children: [
@@ -114,7 +114,7 @@ class _GenericAppBarState extends State<GenericAppBar> {
                       width: widget.logoSize * 0.8,
                     ),
                     const Gap(12),
-                    
+
                     // Title
                     Expanded(
                       child: MyText(
@@ -126,17 +126,34 @@ class _GenericAppBarState extends State<GenericAppBar> {
                         textOverflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    
-                    // Search Icon
-                    if (widget.showSearch && !_isSearching)
-                      IconButton(
-                        icon: SvgPicture.asset(
-                          Assets.searchunfilled,
-                          height: 22,
-                          color: kDynamicIcon(context),
-                        ),
-                        onPressed: _toggleSearch,
-                      ),
+
+                    // Action Icons
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Search Icon
+                        if (widget.showSearch && !_isSearching)
+                          IconButton(
+                            icon: SvgPicture.asset(
+                              Assets.searchunfilled,
+                              height: 22,
+                              color: kDynamicIcon(context),
+                            ),
+                            onPressed: _toggleSearch,
+                          ),
+
+                        // Settings Icon
+                        if (widget.onSettingsTap != null)
+                          IconButton(
+                            icon: SvgPicture.asset(
+                              Assets.settings,
+                              height: 22,
+                              color: kDynamicIcon(context),
+                            ),
+                            onPressed: widget.onSettingsTap,
+                          ),
+                      ],
+                    ),
                   ],
                 ),
         );
@@ -148,9 +165,10 @@ class _GenericAppBarState extends State<GenericAppBar> {
     return Row(
       children: [
         Expanded(
-          child: Container( key: const ValueKey('searchField'),
-                width: double.infinity,
-                margin: const EdgeInsets.only(right: 10, top: 26.0),
+          child: Container(
+            key: const ValueKey('searchField'),
+            width: double.infinity,
+            margin: const EdgeInsets.only(right: 10, top: 26.0),
             child: MyTextField(
               controller: _searchController,
               focusNode: _searchFocusNode,
@@ -171,19 +189,14 @@ class _GenericAppBarState extends State<GenericAppBar> {
                     )
                   : null,
               onChanged: _onSearchChanged,
-              
               hintColor: kDynamicListTileSubtitle(context),
-             
             ),
           ),
         ),
         const Gap(8),
         // Close button
         IconButton(
-          icon: Icon(
-            Icons.close,
-            color: kDynamicText(context),
-          ),
+          icon: Icon(Icons.close, color: kDynamicText(context)),
           onPressed: _toggleSearch,
         ),
       ],
@@ -233,7 +246,8 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
 
 class _CustomAppBarState extends State<CustomAppBar> {
   bool _isSearching = false;
-  final TextEditingController _searchController = TextEditingController(); // Add this
+  final TextEditingController _searchController =
+      TextEditingController(); // Add this
 
   String get currentLangCode => Get.locale?.languageCode ?? 'en';
   bool get isRTL => currentLangCode == 'ar' || currentLangCode == 'sa';
@@ -365,9 +379,9 @@ class _CustomAppBarState extends State<CustomAppBar> {
                   ),
                   suffix: _searchController.text.isNotEmpty
                       ? Bounce(
-                          onTap: _clearSearch, 
+                          onTap: _clearSearch,
                           child: SvgPicture.asset(
-                            Assets.filter, 
+                            Assets.filter,
                             height: 20,
                             color: kDynamicIcon(context),
                           ),
@@ -413,6 +427,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
     );
   }
 }
+
 class CustomAppBar2 extends StatelessWidget implements PreferredSizeWidget {
   final String? title;
   final List<Widget>? actions;

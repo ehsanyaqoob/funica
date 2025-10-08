@@ -25,10 +25,11 @@ class PromoScreen extends StatefulWidget {
   @override
   State<PromoScreen> createState() => _PromoScreenState();
 }
+
 class _PromoScreenState extends State<PromoScreen> {
   PromoCode? _selectedPromo;
   double _discountAmount = 0.0;
-  
+
   final List<PromoCode> _availablePromos = [
     PromoCode(
       code: "WELCOME10",
@@ -95,7 +96,8 @@ class _PromoScreenState extends State<PromoScreen> {
 
     switch (_selectedPromo!.discountType) {
       case DiscountType.percentage:
-        _discountAmount = (widget.totalAmount * _selectedPromo!.discountValue) / 100;
+        _discountAmount =
+            (widget.totalAmount * _selectedPromo!.discountValue) / 100;
         break;
       case DiscountType.fixed:
         _discountAmount = _selectedPromo!.discountValue.toDouble();
@@ -114,8 +116,9 @@ class _PromoScreenState extends State<PromoScreen> {
   }
 
   void _proceedToPayment() {
-    final totalWithDiscount = widget.totalAmount + widget.selectedShipping.price - _discountAmount;
-    
+    final totalWithDiscount =
+        widget.totalAmount + widget.selectedShipping.price - _discountAmount;
+
     Get.to(
       () => PaymentScreen(
         cartItems: widget.cartItems,
@@ -141,9 +144,11 @@ class _PromoScreenState extends State<PromoScreen> {
         return AnnotatedRegion<SystemUiOverlayStyle>(
           value: SystemUiOverlayStyle(
             statusBarColor: Colors.transparent,
-            statusBarIconBrightness: isDarkMode ? Brightness.light : Brightness.dark,
+            statusBarIconBrightness:
+                isDarkMode ? Brightness.light : Brightness.dark,
             systemNavigationBarColor: kDynamicScaffoldBackground(context),
-            systemNavigationBarIconBrightness: isDarkMode ? Brightness.light : Brightness.dark,
+            systemNavigationBarIconBrightness:
+                isDarkMode ? Brightness.light : Brightness.dark,
           ),
           child: Scaffold(
             backgroundColor: kDynamicScaffoldBackground(context),
@@ -152,80 +157,89 @@ class _PromoScreenState extends State<PromoScreen> {
               showLeading: true,
               centerTitle: false,
             ),
-            body: Padding(
-              padding: AppSizes.DEFAULT,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Available Promo Codes
-                  MyText(
-                    text: "Available Offers",
-                    size: 20,
-                    weight: FontWeight.bold,
-                    color: kDynamicText(context),
-                  ),
-                  const Gap(16),
-                  
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: _availablePromos.length,
-                      itemBuilder: (context, index) {
-                        final promo = _availablePromos[index];
-                        return _buildPromoOption(promo);
-                      },
+            body: SafeArea(
+              child: SingleChildScrollView(
+                padding: AppSizes.DEFAULT,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // ---------- Available Offers Header ----------
+                    MyText(
+                      text: "Available Offers",
+                      size: 20,
+                      weight: FontWeight.bold,
+                      color: kDynamicText(context),
                     ),
-                  ),
-                ],
+                    const Gap(16),
+
+                    // ---------- Promo Options List ----------
+                    Column(
+                      children: _availablePromos
+                          .map((promo) => _buildPromoOption(promo))
+                          .toList(),
+                    ),
+
+                    const Gap(100), // space for bottomNavigationBar
+                  ],
+                ),
               ),
             ),
+
+            // ---------- Bottom Navigation Bar ----------
             bottomNavigationBar: Container(
-               padding: const EdgeInsets.all(16),
-  decoration: BoxDecoration(
-    color: kDynamicCard(context),
-    border: Border.all(color: kDynamicBorder(context)),
-    borderRadius: const BorderRadius.only(
-      topLeft: Radius.circular(26.0),
-      topRight: Radius.circular(26.0),
-    ),
-  ),
-              child: Row(
-                children: [
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      MyText(
-                        text: "Total Price",
-                        size: 14,
-                        color: kDynamicListTileSubtitle(context),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: kDynamicCard(context),
+                border: Border.all(color: kDynamicBorder(context)),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(26.0),
+                  topRight: Radius.circular(26.0),
+                ),
+              ),
+              child: SafeArea(
+                child: Row(
+                  children: [
+                    // Left side - Price information
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          MyText(
+                            text: "Total Price",
+                            size: 14,
+                            color: kDynamicListTileSubtitle(context),
+                          ),
+                          const Gap(2),
+                          MyText(
+                            text: "\$${_finalTotal.toStringAsFixed(2)}",
+                            size: 20.0, // Same as other screens
+                            weight: FontWeight.bold,
+                            color: kDynamicText(context),
+                          ),
+                          const Gap(2),
+                          if (_selectedPromo != null)
+                            MyText(
+                              text: "Saved \$${_discountAmount.toStringAsFixed(2)}",
+                              size: 12,
+                              color: Colors.green,
+                              weight: FontWeight.w600,
+                            ),
+                        ],
                       ),
-                      const Gap(2),
-                      MyText(
-                        text: "\$${_finalTotal.toStringAsFixed(2)}",
-                        size: 24,
-                        weight: FontWeight.bold,
-                        color: kDynamicText(context),
-                      ),
-                      if (_selectedPromo != null) ...[
-                        const Gap(2),
-                        MyText(
-                          text: "Saved \$${_discountAmount.toStringAsFixed(2)}",
-                          size: 12,
-                          color: Colors.green,
-                          weight: FontWeight.w600,
-                        ),
-                      ],
-                    ],
-                  ),
-                  const Spacer(),
-                  Expanded(
-                    child: MyButtonWithIcon(
-                      iconPath: Assets.money,
-                      text: "Continue",
-                      onTap: _proceedToPayment,
                     ),
-                  ),
-                ],
+                    // Same gap as other screens
+                    const Gap(18.0),
+                    // Right side - Continue button
+                    Expanded(
+                      child: MyButtonWithIcon(
+                        iconPath: Assets.money,
+                        text: "Continue",
+                        onTap: _proceedToPayment,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -247,9 +261,7 @@ class _PromoScreenState extends State<PromoScreen> {
           color: kDynamicCard(context),
           borderRadius: BorderRadius.circular(30.0),
           border: Border.all(
-            color: isSelected
-                ? kDynamicPrimary(context)
-                : kDynamicBorder(context),
+            color: isSelected ? kDynamicPrimary(context) : kDynamicBorder(context),
             width: isSelected ? 2.0 : 1.2,
           ),
         ),
@@ -266,11 +278,11 @@ class _PromoScreenState extends State<PromoScreen> {
               child: SvgPicture.asset(
                 Assets.discount,
                 height: 24,
-                color:  kDynamicIcon(context),
+                color: kDynamicIcon(context),
               ),
             ),
             const Gap(16),
-            
+
             // Promo Details
             Expanded(
               child: Column(
@@ -318,29 +330,41 @@ class _PromoScreenState extends State<PromoScreen> {
                 ],
               ),
             ),
-            
+
             const Gap(16),
-            
+
             // Selection Indicator
-            Container(
-             width: 20,
-  height: 20,
-  decoration: BoxDecoration(
-    shape: BoxShape.circle,
-    border: Border.all(
-      color: kDynamicRadioBorder(context, isSelected),
-      width: 2,
-    ),
-  ),
-              child: isSelected && isEligible
-                  ? Container(
-          margin: const EdgeInsets.all(4),
-          decoration: BoxDecoration(
-            color: kDynamicRadioActive(context),
-            shape: BoxShape.circle,
-          ),
-        )
-                  : null,
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                MyText(
+                  text: _formatPrice(promo),
+                  size: 14,
+                  weight: FontWeight.bold,
+                  color: kDynamicText(context),
+                ),
+                const Gap(8),
+                Container(
+                  width: 20,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: kDynamicRadioBorder(context, isSelected),
+                      width: 2,
+                    ),
+                  ),
+                  child: isSelected && isEligible
+                      ? Container(
+                          margin: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: kDynamicRadioActive(context),
+                            shape: BoxShape.circle,
+                          ),
+                        )
+                      : null,
+                ),
+              ],
             ),
           ],
         ),
@@ -358,5 +382,11 @@ class _PromoScreenState extends State<PromoScreen> {
         return "Free shipping";
     }
   }
+
+  String _formatPrice(PromoCode promo) {
+    if (promo.discountType == DiscountType.fixed) {
+      return "-\$${promo.discountValue}";
+    }
+    return "";
+  }
 }
- 

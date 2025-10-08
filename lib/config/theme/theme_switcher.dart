@@ -10,9 +10,21 @@ class ThemeSwitcher extends StatefulWidget {
 class _ThemeSwitcherState extends State<ThemeSwitcher> {
   @override
   Widget build(BuildContext context) {
-    final ThemeController themeController = Get.find();
-
-    return Obx(() {
+   return GetBuilder<ThemeController>(
+      builder: (themeController) {
+        final bool isDarkMode = themeController.isDarkMode;
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          value: SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: isDarkMode
+                ? Brightness.light
+                : Brightness.dark,
+            systemNavigationBarColor: kDynamicScaffoldBackground(context),
+            systemNavigationBarIconBrightness: isDarkMode
+                ? Brightness.light
+                : Brightness.dark,
+          ),
+          child: Obx(() {
       return SwitchListTile(
         title: Text(themeController.isDarkMode ? 'Dark Mode' : 'Light Mode'),
         value: themeController.isDarkMode,
@@ -20,6 +32,6 @@ class _ThemeSwitcherState extends State<ThemeSwitcher> {
           themeController.toggleTheme();
         },
       );
-    });
+    }));});
   }
 }
