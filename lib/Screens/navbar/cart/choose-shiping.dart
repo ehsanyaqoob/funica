@@ -121,77 +121,84 @@ class _ShippingScreenState extends State<ShippingScreen> {
               showLeading: true,
               centerTitle: false,
             ),
-            body: Padding(
-              padding: AppSizes.DEFAULT,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Shipping Options List
-                  MyText(
-                    text: "Choose Shipping Method",
-                    size: 20,
-                    weight: FontWeight.bold,
-                    color: kDynamicText(context),
-                  ),
-                  const Gap(16),
-
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: _shippingOptions.length,
-                      itemBuilder: (context, index) {
-                        final option = _shippingOptions[index];
-                        return _buildShippingOption(option);
-                      },
+            body: SafeArea(
+              child: SingleChildScrollView(
+                padding: AppSizes.DEFAULT,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // ---------- Shipping Options Header ----------
+                    MyText(
+                      text: "Choose Shipping Method",
+                      size: 20,
+                      weight: FontWeight.bold,
+                      color: kDynamicText(context),
                     ),
-                  ),
-                ],
+                    const Gap(16),
+
+                    // ---------- Shipping Options List ----------
+                    Column(
+                      children: _shippingOptions
+                          .map((option) => _buildShippingOption(option))
+                          .toList(),
+                    ),
+
+                    const Gap(100), // space for bottomNavigationBar
+                  ],
+                ),
               ),
             ),
+
+            // ---------- Bottom Navigation Bar ----------
             bottomNavigationBar: Container(
-               padding: const EdgeInsets.all(16),
-  decoration: BoxDecoration(
-    color: kDynamicCard(context),
-    border: Border.all(color: kDynamicBorder(context)),
-    borderRadius: const BorderRadius.only(
-      topLeft: Radius.circular(26.0),
-      topRight: Radius.circular(26.0),
-    ),
-  ),
-              child: Row(
-                children: [
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      MyText(
-                        text: "Total Price",
-                        size: 14,
-                        color: kDynamicListTileSubtitle(context),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: kDynamicCard(context),
+                border: Border.all(color: kDynamicBorder(context)),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(26.0),
+                  topRight: Radius.circular(26.0),
+                ),
+              ),
+              child: SafeArea(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          MyText(
+                            text: "Total Price",
+                            size: 14,
+                            color: kDynamicListTileSubtitle(context),
+                          ),
+                          const Gap(2),
+                          MyText(
+                            text: "\$${(widget.totalAmount + _getSelectedShippingPrice()).toStringAsFixed(2)}",
+                            size: 20.0, // Same as CheckoutScreen
+                            weight: FontWeight.bold,
+                            color: kDynamicText(context),
+                          ),
+                          const Gap(2),
+                          MyText(
+                            text: "Shipping: \$${_getSelectedShippingPrice().toStringAsFixed(2)}",
+                            size: 12,
+                            color: kDynamicListTileSubtitle(context),
+                          ),
+                        ],
                       ),
-                      const Gap(2),
-                      MyText(
-                        text: "\$${(widget.totalAmount + _getSelectedShippingPrice()).toStringAsFixed(2)}",
-                        size: 24,
-                        weight: FontWeight.bold,
-                        color: kDynamicText(context),
-                      ),
-                      const Gap(2),
-                      MyText(
-                        text: "Shipping: \$${_getSelectedShippingPrice().toStringAsFixed(2)}",
-                        size: 12,
-                        color: kDynamicListTileSubtitle(context),
-                      ),
-                    ],
-                  ),
-                  const Spacer(),
-                  Expanded(
-                    child: MyButtonWithIcon(
-                      iconPath: Assets.money,
-                      text: "Continue",
-                      onTap: _proceedToPayment,
                     ),
-                  ),
-                ],
+                    const Gap(18.0),
+                    Expanded(
+                      child: MyButtonWithIcon(
+                        iconPath: Assets.money,
+                        text: "Continue",
+                        onTap: _proceedToPayment,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -238,7 +245,7 @@ class _ShippingScreenState extends State<ShippingScreen> {
               child: SvgPicture.asset(
                 option.icon,
                 height: 30.0,
-                color:  kDynamicIcon(context),
+                color: kDynamicIcon(context),
               ),
             ),
             const Gap(16),
@@ -284,27 +291,26 @@ class _ShippingScreenState extends State<ShippingScreen> {
             const Gap(16),
 
             // Radio Button
-           Container(
-  width: 20,
-  height: 20,
-  decoration: BoxDecoration(
-    shape: BoxShape.circle,
-    border: Border.all(
-      color: kDynamicRadioBorder(context, isSelected),
-      width: 2,
-    ),
-  ),
-  child: isSelected
-      ? Container(
-          margin: const EdgeInsets.all(4),
-          decoration: BoxDecoration(
-            color: kDynamicRadioActive(context),
-            shape: BoxShape.circle,
-          ),
-        )
-      : null,
-)
-
+            Container(
+              width: 20,
+              height: 20,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: kDynamicRadioBorder(context, isSelected),
+                  width: 2,
+                ),
+              ),
+              child: isSelected
+                  ? Container(
+                      margin: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: kDynamicRadioActive(context),
+                        shape: BoxShape.circle,
+                      ),
+                    )
+                  : null,
+            ),
           ],
         ),
       ),

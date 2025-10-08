@@ -1,5 +1,5 @@
-import 'package:funica/Screens/navbar/cart/choose-shiping.dart'
-    show ShippingScreen;
+import 'package:flutter/material.dart';
+import 'package:funica/Screens/navbar/cart/choose-shiping.dart';
 import 'package:funica/Screens/navbar/cart/shippin-screen.dart';
 import 'package:funica/constants/export.dart';
 import 'package:funica/controller/prodcut-cont.dart';
@@ -21,6 +21,7 @@ class CheckoutScreen extends StatefulWidget {
   @override
   State<CheckoutScreen> createState() => _CheckoutScreenState();
 }
+
 class _CheckoutScreenState extends State<CheckoutScreen> {
   String _selectedAddress = "Home";
   final Map<String, String> _addresses = {
@@ -49,7 +50,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 }
               });
             }
-          : null, // Don't allow delete if only one address
+          : null,
     );
   }
 
@@ -71,6 +72,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         selectedAddress: _selectedAddress,
       ),
       transition: Transition.cupertino,
+      duration: const Duration(milliseconds: 300),
     );
   }
 
@@ -82,13 +84,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         return AnnotatedRegion<SystemUiOverlayStyle>(
           value: SystemUiOverlayStyle(
             statusBarColor: Colors.transparent,
-            statusBarIconBrightness: isDarkMode
-                ? Brightness.light
-                : Brightness.dark,
+            statusBarIconBrightness:
+                isDarkMode ? Brightness.light : Brightness.dark,
             systemNavigationBarColor: kDynamicScaffoldBackground(context),
-            systemNavigationBarIconBrightness: isDarkMode
-                ? Brightness.light
-                : Brightness.dark,
+            systemNavigationBarIconBrightness:
+                isDarkMode ? Brightness.light : Brightness.dark,
           ),
           child: Scaffold(
             backgroundColor: kDynamicScaffoldBackground(context),
@@ -97,197 +97,194 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               showLeading: true,
               centerTitle: false,
             ),
-            body: Padding(
-              padding: AppSizes.DEFAULT,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Shipping Address Section
-                  Row(
-                    children: [
-                      MyText(
-                        text: "Shipping Address",
-                        size: 20,
-                        weight: FontWeight.bold,
-                        color: kDynamicText(context),
-                      ),
-                      const Spacer(),
-                      // Add New Address Button (only show if less than 3 addresses)
-                      if (_addresses.length < 3)
-                        Bounce(
-                          onTap: _showAddAddressSheet,
-                          child: Container(
-                            padding: const EdgeInsets.all(12.0),
-                            decoration: BoxDecoration(
-                              color: kDynamicCard(context),
-                              borderRadius: BorderRadius.circular(16.0),
-                              border: Border.all(
-                                color: kDynamicBorder(context),
-                                width: 1.2,
+            body: SafeArea(
+              child: SingleChildScrollView(
+                padding: AppSizes.DEFAULT,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // ---------- Shipping Address ----------
+                    Row(
+                      children: [
+                        MyText(
+                          text: "Shipping Address",
+                          size: 20,
+                          weight: FontWeight.bold,
+                          color: kDynamicText(context),
+                        ),
+                        const Spacer(),
+                        if (_addresses.length < 3)
+                          Bounce(
+                            onTap: _showAddAddressSheet,
+                            child: Container(
+                              padding: const EdgeInsets.all(12.0),
+                              decoration: BoxDecoration(
+                                color: kDynamicCard(context),
+                                borderRadius: BorderRadius.circular(16.0),
+                                border: Border.all(
+                                  color: kDynamicBorder(context),
+                                  width: 1.2,
+                                ),
+                              ),
+                              child: MyText(
+                                text: "Add New",
+                                size: 12,
+                                color: kDynamicText(context),
+                                weight: FontWeight.bold,
                               ),
                             ),
-                            child: MyText(
-                              text: "Add New",
-                              size: 12,
-                              color: kDynamicText(context),
-                              weight: FontWeight.bold,
-                            ),
                           ),
-                        ),
-                    ],
-                  ),
-                  const Gap(16),
-
-                  // Single Address Display (only show the selected one)
-                  ShippingAddressWidget(
-                    addressTitle: _selectedAddress,
-                    fullAddress: _addresses[_selectedAddress]!,
-                    isSelected: true,
-                    onEditPressed: () => _showAddressPreview(
-                      _selectedAddress,
-                      _addresses[_selectedAddress]!,
+                      ],
                     ),
-                  ),
+                    const Gap(16),
 
-                  // Address Selection Dropdown if multiple addresses exist
-                  if (_addresses.length > 1) ...[
-                    const Gap(12),
-                    Container(
-                      height: 60,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
+                    ShippingAddressWidget(
+                      addressTitle: _selectedAddress,
+                      fullAddress: _addresses[_selectedAddress]!,
+                      isSelected: true,
+                      onEditPressed: () => _showAddressPreview(
+                        _selectedAddress,
+                        _addresses[_selectedAddress]!,
                       ),
-                      decoration: BoxDecoration(
-                        color: kDynamicCard(context),
-                        borderRadius: BorderRadius.circular(16.0),
-                        border: Border.all(
-                          color: kDynamicBorder(context),
-                          width: 1.5,
-                        ),
-                      ),
-                      child: Row(
+                    ),
+
+                    if (_addresses.length > 1) ...[
+                      const Gap(12),
+                      _buildAddressDropdown(context),
+                    ],
+
+                    const Gap(24),
+
+                    // ---------- Order List ----------
+                    MyText(
+                      text: "Order List",
+                      size: 20,
+                      weight: FontWeight.w600,
+                      color: kDynamicText(context),
+                    ),
+                    const Gap(16),
+
+                    // ---------- Cart Items ----------
+                    Column(
+                      children: widget.cartItems
+                          .map((cartItem) => _buildCheckoutItem(cartItem))
+                          .toList(),
+                    ),
+
+                    const Gap(100), // space for bottomNavigationBar
+                  ],
+                ),
+              ),
+            ),
+
+            // ---------- Bottom Navigation Bar ----------
+            bottomNavigationBar: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: kDynamicCard(context),
+                border: Border.all(color: kDynamicBorder(context)),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(26.0),
+                  topRight: Radius.circular(26.0),
+                ),
+              ),
+              child: SafeArea(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           MyText(
-                            text: "Change to:",
+                            text: "Total Price",
                             size: 14,
                             color: kDynamicListTileSubtitle(context),
                           ),
-                          const Gap(8),
-                          Expanded(
-                            child: DropdownButton<String>(
-                              value: _selectedAddress,
-                              isExpanded: true,
-                              underline: const SizedBox(),
-                              dropdownColor: kDynamicCard(context),
-                              style: TextStyle(
-                                color: kDynamicText(context),
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              items: _addresses.entries.map((entry) {
-                                return DropdownMenuItem<String>(
-                                  value: entry.key,
-                                  child: MyText(
-                                    text: entry.key,
-                                    size: 14,
-                                    color: kDynamicText(context),
-                                  ),
-                                );
-                              }).toList(),
-                              onChanged: (String? newValue) {
-                                if (newValue != null) {
-                                  setState(() {
-                                    _selectedAddress = newValue;
-                                  });
-                                }
-                              },
-                            ),
+                          const Gap(2),
+                          MyText(
+                            text:
+                                "\$${widget.totalAmount.toStringAsFixed(2)}",
+                            size: 20.0,
+                            weight: FontWeight.bold,
+                            color: kDynamicText(context),
+                          ),
+                          const Gap(2),
+                          MyText(
+                            text: "${widget.cartItems.length} items",
+                            size: 12,
+                            color: kDynamicListTileSubtitle(context),
                           ),
                         ],
                       ),
                     ),
-                  ],
-
-                  const Gap(24),
-
-                  // Order List
-                  MyText(
-                    text: "Order List",
-                    size: 20,
-                    weight: FontWeight.w600,
-                    color: kDynamicText(context),
-                  ),
-                  const Gap(16),
-
-                  // Cart Items List
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: widget.cartItems.length,
-                      itemBuilder: (context, index) {
-                        final cartItem = widget.cartItems[index];
-                        return _buildCheckoutItem(cartItem);
-                      },
+                    const Gap(18.0),
+                    Expanded(
+                      child: MyButtonWithIcon(
+                        iconPath: Assets.checkout,
+                        text: "Continue",
+                        onTap: _proceedToShipping,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-           bottomNavigationBar: Container(
-  padding: const EdgeInsets.all(16),
-  decoration: BoxDecoration(
-    color: kDynamicCard(context),
-    border: Border.all(color: kDynamicBorder(context)),
-    borderRadius: const BorderRadius.only(
-      topLeft: Radius.circular(26.0),
-      topRight: Radius.circular(26.0),
-    ),
-  ),
-  child: SafeArea(
-    child: Row(
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              MyText(
-                text: "Total Price",
-                size: 14,
-                color: kDynamicListTileSubtitle(context),
-              ),
-              const Gap(2),
-              MyText(
-                text: "\$${widget.totalAmount.toStringAsFixed(2)}",
-                size: 20.0,
-                weight: FontWeight.bold,
-                color: kDynamicText(context),
-              ),
-              const Gap(2),
-              MyText(
-                text: "${widget.cartItems.length} items",
-                size: 12,
-                color: kDynamicListTileSubtitle(context),
-              ),
-            ],
-          ),
-        ),
-        const Gap(18.0),
-        Expanded(
-          child: MyButtonWithIcon(
-            iconPath: Assets.checkout,
-            text: "Continue",
-            onTap: _proceedToShipping,
-          ),
-        ),
-      ],
-    ),
-  ),
-),
-
           ),
         );
       },
+    );
+  }
+
+  Widget _buildAddressDropdown(BuildContext context) {
+    return Container(
+      height: 60,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: kDynamicCard(context),
+        borderRadius: BorderRadius.circular(16.0),
+        border: Border.all(color: kDynamicBorder(context), width: 1.5),
+      ),
+      child: Row(
+        children: [
+          MyText(
+            text: "Change to:",
+            size: 14,
+            color: kDynamicListTileSubtitle(context),
+          ),
+          const Gap(8),
+          Expanded(
+            child: DropdownButton<String>(
+              value: _selectedAddress,
+              isExpanded: true,
+              underline: const SizedBox(),
+              dropdownColor: kDynamicCard(context),
+              style: TextStyle(
+                color: kDynamicText(context),
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+              items: _addresses.entries.map((entry) {
+                return DropdownMenuItem<String>(
+                  value: entry.key,
+                  child: MyText(
+                    text: entry.key,
+                    size: 14,
+                    color: kDynamicText(context),
+                  ),
+                );
+              }).toList(),
+              onChanged: (String? newValue) {
+                if (newValue != null) {
+                  setState(() {
+                    _selectedAddress = newValue;
+                  });
+                }
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -373,7 +370,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   Color _getColorFromIndex(int index) {
-    final List<Color> _colors = [
+    final List<Color> colors = [
       Colors.brown,
       Colors.grey,
       Colors.purple,
@@ -381,11 +378,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       Colors.green,
       Colors.blue,
     ];
-    if (index >= 0 && index < _colors.length) {
-      return _colors[index];
-    }
-    return Colors.grey;
+    return (index >= 0 && index < colors.length)
+        ? colors[index]
+        : Colors.grey;
   }
 }
-
-  

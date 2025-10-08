@@ -84,14 +84,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
       (method) => method.id == _selectedPaymentMethod,
     );
 
-    // Check wallet balance if using wallet
     if (selectedMethod.type == PaymentType.wallet &&
         selectedMethod.balance! < _finalTotal) {
       AppToast.error("Insufficient wallet balance");
       return;
     }
 
-    // Show payment processing bottom sheet
     BottomSheetHelper.showPaymentProcessingSheet(
       cartItems: widget.cartItems,
       totalAmount: widget.totalAmount,
@@ -105,35 +103,26 @@ class _PaymentScreenState extends State<PaymentScreen> {
   }
 
   void _navigateToOrderScreen() {
+    // Close any open dialogs or sheets first
+    if (Get.isDialogOpen ?? false) Get.back();
+    if (Get.isBottomSheetOpen ?? false) Get.back();
+
+    // Navigate to navbar and switch to orders tab
     Get.offAll(
-      Get.to(
-        FunicaNavBar(),
-        transition: Transition.cupertino,
-        duration: Duration(microseconds: 500),
-      ),
+      () => FunicaNavBar(),
+      transition: Transition.cupertino,
+      duration: const Duration(milliseconds: 500),
     );
-    Future.delayed(const Duration(milliseconds: 300), () {
-      final navController = Get.find<NavController>();
-      navController.changeIndex(3);
 
-      AppToast.success("Order placed successfully!");
+    Future.delayed(const Duration(milliseconds: 400), () {
+      try {
+        final navController = Get.find<NavController>();
+        navController.changeIndex(2); 
+        AppToast.success("Order placed successfully!");
+      } catch (e) {
+        print('Error switching to orders tab: $e');
+      }
     });
-  }
-
-  String _getEstimatedDelivery() {
-    final now = DateTime.now();
-    final deliveryDays = widget.selectedShipping.deliveryTime.contains('1-2')
-        ? 2
-        : widget.selectedShipping.deliveryTime.contains('3-5')
-        ? 5
-        : widget.selectedShipping.deliveryTime.contains('5-7')
-        ? 7
-        : widget.selectedShipping.deliveryTime.contains('Next')
-        ? 1
-        : 10;
-
-    final deliveryDate = now.add(Duration(days: deliveryDays));
-    return "${deliveryDate.day}/${deliveryDate.month}/${deliveryDate.year}";
   }
 
   double get _finalTotal {
@@ -165,47 +154,36 @@ class _PaymentScreenState extends State<PaymentScreen> {
               showLeading: true,
               centerTitle: false,
             ),
-            body: Padding(
-              padding: AppSizes.DEFAULT,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Order Summary
-                  _buildOrderSummary(),
-                  const Gap(20),
-
-                  // Payment Methods
-                  MyText(
-                    text: "Select Payment Method",
-                    size: 18,
-                    weight: FontWeight.w600,
-                    color: kDynamicText(context),
-                  ),
-                  const Gap(16),
-
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: _paymentMethods.length,
-                      itemBuilder: (context, index) {
-                        final method = _paymentMethods[index];
-                        return _buildPaymentMethod(method);
-                      },
+            body: SafeArea(
+              child: SingleChildScrollView(
+                padding: AppSizes.DEFAULT,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildOrderSummary(),
+                    const Gap(24),
+                    MyText(
+                      text: "Select Payment Method",
+                      size: 18,
+                      weight: FontWeight.w600,
+                      color: kDynamicText(context),
                     ),
-                  ),
-                ],
+                    const Gap(16),
+                    Column(
+                      children: _paymentMethods
+                          .map((method) => _buildPaymentMethod(method))
+                          .toList(),
+                    ),
+                    const Gap(100),
+                  ],
+                ),
               ),
             ),
             bottomNavigationBar: Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               decoration: BoxDecoration(
-                color: kDynamicScaffoldBackground(context),
-                boxShadow: [
-                  BoxShadow(
-                    color: kDynamicShadow(context),
-                    blurRadius: 12,
-                    offset: const Offset(0, -4),
-                  ),
-                ],
+                color: kDynamicCard(context),
+                border: Border.all(color: kDynamicBorder(context)),
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(26.0),
                   topRight: Radius.circular(26.0),
@@ -322,7 +300,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
               ],
             ),
           ],
-
           Gap(6),
           Divider(thickness: 2.5, color: kDynamicDivider(context)),
           Gap(6),
@@ -356,9 +333,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
     return GestureDetector(
       onTap: () {
         if (!hasInsufficientBalance) {
-          setState(() {
-            _selectedPaymentMethod = method.id;
-          });
+          setState(() => _selectedPaymentMethod = method.id);
         }
       },
       child: Container(
@@ -376,7 +351,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
         ),
         child: Row(
           children: [
-            // Payment Icon
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -391,8 +365,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
               ),
             ),
             const Gap(16),
-
-            // Payment Details
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -448,10 +420,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 ],
               ),
             ),
-
             const Gap(16),
-
-            // Radio Button
             Container(
               width: 20,
               height: 20,
@@ -481,7 +450,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
   }
 }
 
-// Payment Method Model
 class PaymentMethod {
   final String id;
   final String name;
@@ -501,53 +469,3 @@ class PaymentMethod {
 }
 
 enum PaymentType { wallet, digital, card }
-
-// Order Success Screen (Basic structure)
-class OrderSuccessScreen extends StatelessWidget {
-  final String orderNumber;
-  final double totalAmount;
-  final int items;
-  final String estimatedDelivery;
-
-  const OrderSuccessScreen({
-    super.key,
-    required this.orderNumber,
-    required this.totalAmount,
-    required this.items,
-    required this.estimatedDelivery,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: kDynamicScaffoldBackground(context),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SvgPicture.asset(
-              Assets.personfilled,
-              height: 100,
-              color: Colors.green,
-            ),
-            const Gap(20),
-            MyText(
-              text: "Order Placed Successfully!",
-              size: 24,
-              weight: FontWeight.bold,
-              color: kDynamicText(context),
-            ),
-            const Gap(8),
-            MyText(
-              text: "Order #$orderNumber",
-              size: 16,
-              color: kDynamicListTileSubtitle(context),
-            ),
-            const Gap(20),
-            MyButton(buttonText: "Continue Shopping"),
-          ],
-        ),
-      ),
-    );
-  }
-}

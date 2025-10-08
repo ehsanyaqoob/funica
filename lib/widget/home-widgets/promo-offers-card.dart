@@ -74,7 +74,7 @@ class _SwipeablePromoCardsState extends State<SwipeablePromoCards>
                 child: ScaleTransition(
                   scale: _tapController,
                   child: Container(
-                    margin: EdgeInsets.symmetric(horizontal: 12),
+                    margin: EdgeInsets.symmetric(horizontal: 4),
                     decoration: BoxDecoration(
                       color: kDynamicContainer(context),
                       borderRadius: BorderRadius.circular(26.0),
@@ -90,7 +90,7 @@ class _SwipeablePromoCardsState extends State<SwipeablePromoCards>
                         Expanded(
                           flex: 2,
                           child: Padding(
-                            padding: const EdgeInsets.all(20.0),
+                            padding: const EdgeInsets.all(10.0),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -101,14 +101,14 @@ class _SwipeablePromoCardsState extends State<SwipeablePromoCards>
                                   weight: FontWeight.bold,
                                   color: kDynamicText(context),
                                 ),
-                                const Gap(8),
+                                const Gap(6),
                                 MyText(
                                   text: item.title,
                                   size: 16,
                                   weight: FontWeight.w600,
                                   color: kDynamicText(context),
                                 ),
-                                const Gap(8),
+                                const Gap(6),
                                 MyText(
                                   text: item.subtitle,
                                   size: 12,
@@ -122,7 +122,7 @@ class _SwipeablePromoCardsState extends State<SwipeablePromoCards>
                         // 🔹 Right Image
                         Image.asset(
                           item.image,
-                          height:300,
+                          height:200,
                           fit: BoxFit.fitHeight,
                         ),
                       ],

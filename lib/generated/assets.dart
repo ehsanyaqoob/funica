@@ -205,6 +205,18 @@ class Assets {
   static const String amazon = "assets/images/amazon.svg";
 
   static const String close = "assets/images/close.svg";
+    static const String eye = "assets/images/eye.svg";
+  static const String tracking = "assets/images/tracking.svg";
+  static const String info = "assets/images/info.svg";
+  static const String processing = "assets/images/processing.svg";
+  static const String refreshed = "assets/images/refreshed.svg";
+  static const String settings = "assets/images/settings.svg";
+  static const String up = "assets/images/up.svg";
+  static const String down = "assets/images/down.svg";
+  static const String visa = "assets/images/visa.svg";
+  static const String visacard = "assets/images/visacard.svg";
+
+
 
 
   static const String imagesFignerprintScan =

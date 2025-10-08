@@ -29,8 +29,8 @@ class _CategoryGridState extends State<CategoryGrid> {
       itemCount: widget.items.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 4,
-        mainAxisSpacing: 16,
-        crossAxisSpacing: 16,
+        mainAxisSpacing: 10,
+        crossAxisSpacing: 6,
         childAspectRatio: 0.85,
       ),
       itemBuilder: (context, index) {
