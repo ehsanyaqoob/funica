@@ -1,11 +1,7 @@
-# 🪑 Funica — Smart Modern Furniture App (Flutter)
----
+# Funica — Modern Furniture Shopping App
 
-## ✨ Overview
-
-**Funica** is a **modern, smart, and fully responsive furniture shopping app** built entirely using **Flutter**.  
-It allows users to browse, customize, and purchase elegant furniture pieces from the comfort of their home — all within a seamless, beautifully designed app that works on both **Android** and **iOS** devices.
-
+A beautiful and fully functional **furniture e-commerce app** built with Flutter.  
+It demonstrates clean architecture, modern UI/UX, smooth animations, and advanced state management.
 ---
 
 ## 🧭 Features
